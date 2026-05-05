@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Game Stack — Gamer's Integrated Portfolio</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="data.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #06070d; --bg2: #0c0d1a; --bg3: #12142a;
+  --accent: #7C3AED; --accent2: #a855f7; --accent3: #c084fc;
+  --text: #f0f0ff; --text2: #9899b8; --text3: #5f607a;
+  --font: 'Plus Jakarta Sans', sans-serif; --font2: 'Space Grotesk', sans-serif;
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); overflow-x: hidden; }
+body { background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124,58,237,0.18), transparent), var(--bg); }
+::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.18); border-radius: 99px; }
+button { cursor: pointer; font-family: var(--font); border: none; background: none; color: inherit; }
+input, textarea, select { font-family: var(--font); }
+img { display: block; }
+a { text-decoration: none; color: inherit; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+const DATA = window.GS_DATA;
+
+// ── TWEAK DEFAULTS ────────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#843dff",
+  "accentColor2": "#a855f7",
+  "glassBlur": 12,
+  "fontFamily": "Plus Jakarta Sans",
+  "showAnimations": true,
+  "compactMode": false
+}/*EDITMODE-END*/;
+
+// ── TWEAKS PANEL ──────────────────────────────────────────────────────────────
+const TWEAKS_CSS = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:272px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;background:rgba(250,249,247,.82);color:#29261b;-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border:.5px solid rgba(255,255,255,.6);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.22);font:11.5px/1.4 ui-sans-serif,system-ui,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.5);width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:13px}
+  .twk-x:hover{background:rgba(0,0,0,.07)}
+  .twk-body{padding:4px 14px 14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0}
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(41,38,27,.4);padding-top:8px}
+  .twk-row{display:flex;flex-direction:column;gap:4px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{font-weight:500;color:rgba(41,38,27,.7);display:flex;justify-content:space-between}
+  .twk-val{color:rgba(41,38,27,.45);font-variant-numeric:tabular-nums}
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;border-radius:99px;background:rgba(0,0,0,.12);outline:none;margin:4px 0}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;border:.5px solid rgba(0,0,0,.15);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:pointer}
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:99px;background:rgba(0,0,0,.15);transition:background .15s;cursor:pointer;padding:0;flex-shrink:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s;pointer-events:none}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;background:rgba(0,0,0,.07);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;background:rgba(255,255,255,.92);box-shadow:0 1px 2px rgba(0,0,0,.12);transition:left .15s,width .15s}
+  .twk-seg button{position:relative;z-index:1;flex:1;border:0;background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;border-radius:6px;cursor:pointer;padding:3px 6px}
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:52px;height:22px;border:.5px solid rgba(0,0,0,.12);border-radius:6px;padding:0;cursor:pointer;background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5px}
+`;
+
+function useTweaks(defaults) {
+  const [values, setValues] = useState(defaults);
+  const setTweak = useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' ? keyOrEdits : { [keyOrEdits]: val };
+    setValues(prev => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+  }, []);
+  return { tweaks: values, setTweak };
+}
+
+function TweaksPanel({ children, title = 'Tweaks' }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const off = useRef({ x: 16, y: 16 });
+  useEffect(() => {
+    const onMsg = e => {
+      if (e?.data?.type === '__activate_edit_mode') setOpen(true);
+      else if (e?.data?.type === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+  const dismiss = () => { setOpen(false); window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*'); };
+  const onDrag = e => {
+    const el = ref.current; if (!el) return;
+    const r = el.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY, sr = window.innerWidth - r.right, sb = window.innerHeight - r.bottom;
+    const mv = ev => { off.current = { x: Math.max(8, sr-(ev.clientX-sx)), y: Math.max(8, sb-(ev.clientY-sy)) }; el.style.right = off.current.x+'px'; el.style.bottom = off.current.y+'px'; };
+    const up = () => { window.removeEventListener('mousemove',mv); window.removeEventListener('mouseup',up); };
+    window.addEventListener('mousemove',mv); window.addEventListener('mouseup',up);
+  };
+  if (!open) return null;
+  return (
+    <>
+      <style>{TWEAKS_CSS}</style>
+      <div ref={ref} className="twk-panel" style={{ right: off.current.x, bottom: off.current.y }}>
+        <div className="twk-hd" onMouseDown={onDrag}>
+          <b>{title}</b>
+          <button className="twk-x" onMouseDown={e=>e.stopPropagation()} onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">{children}</div>
+      </div>
+    </>
+  );
+}
+const TweakSection = ({ label, children }) => <><div className="twk-sect">{label}</div>{children}</>;
+const TweakSlider = ({ label, value, min=0, max=100, step=1, unit='', onChange }) => (
+  <div className="twk-row">
+    <div className="twk-lbl"><span>{label}</span><span className="twk-val">{value}{unit}</span></div>
+    <input type="range" className="twk-slider" min={min} max={max} step={step} value={value} onChange={e=>onChange(Number(e.target.value))}/>
+  </div>
+);
+const TweakToggle = ({ label, value, onChange }) => (
+  <div className="twk-row twk-row-h">
+    <div className="twk-lbl"><span>{label}</span></div>
+    <button type="button" className="twk-toggle" data-on={value?'1':'0'} onClick={()=>onChange(!value)}><i/></button>
+  </div>
+);
+const TweakRadio = ({ label, value, options, onChange }) => {
+  const opts = options.map(o => typeof o==='object'?o:{value:o,label:o});
+  const idx = Math.max(0, opts.findIndex(o=>o.value===value));
+  const n = opts.length;
+  return (
+    <div className="twk-row">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <div className="twk-seg">
+        <div className="twk-seg-thumb" style={{left:`calc(2px + ${idx}*(100% - 4px)/${n})`,width:`calc((100% - 4px)/${n})`}}/>
+        {opts.map(o=><button key={o.value} type="button" onClick={()=>onChange(o.value)}>{o.label}</button>)}
+      </div>
+    </div>
+  );
+};
+const TweakColor = ({ label, value, onChange }) => (
+  <div className="twk-row twk-row-h">
+    <div className="twk-lbl"><span>{label}</span></div>
+    <input type="color" className="twk-swatch" value={value} onChange={e=>onChange(e.target.value)}/>
+  </div>
+);
+
+// ── ICONS ──────────────────────────────────────────────────────────────────────
+const ICONS = {
+  home:"M3 12L12 3l9 9M5 10v10h5v-6h4v6h5V10",
+  library:"M4 6h16M4 10h16M4 14h10M4 18h6",
+  profile:"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
+  lfg:"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+  stats:"M18 20V10M12 20V4M6 20v-6",
+  search:"M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z",
+  plus:"M12 5v14M5 12h14",
+  star:"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+  x:"M18 6L6 18M6 6l12 12",
+  clock:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2",
+  bookmark:"M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z",
+  settings:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
+  grid:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
+  list:"M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
+  trophy:"M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2z",
+  fire:"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z",
+  gamepad:"M6 12h4M8 10v4M15 11h.01M18 11h.01M21 6H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1z",
+  share:"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13",
+  edit:"M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z",
+  externalLink:"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3",
+  chevronRight:"M9 18l6-6-6-6",
+  chevronLeft:"M15 18l-6-6 6-6",
+  zap:"M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+};
+const Icon = ({ name, size=18, style }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <path d={ICONS[name] || ICONS.gamepad}/>
+  </svg>
+);
+
+// ── STATUS BADGE ───────────────────────────────────────────────────────────────
+const STATUS_META = {
+  playing:   { label:"Playing",   color:"#22c55e", bg:"rgba(34,197,94,0.12)",  icon:"gamepad" },
+  completed: { label:"Completed", color:"#7C3AED", bg:"rgba(124,58,237,0.12)", icon:"trophy" },
+  backlog:   { label:"Backlog",   color:"#f59e0b", bg:"rgba(245,158,11,0.12)", icon:"bookmark" },
+  dropped:   { label:"Dropped",   color:"#ef4444", bg:"rgba(239,68,68,0.12)",  icon:"x" },
+};
+const StatusBadge = ({ status, size="sm" }) => {
+  const m = STATUS_META[status] || STATUS_META.backlog;
+  return (
+    <span style={{ display:"inline-flex", alignItems:"center", gap:4, padding: size==="sm"?"3px 8px":"5px 12px", borderRadius:99, background:m.bg, color:m.color, fontSize: size==="sm"?11:13, fontWeight:600 }}>
+      <Icon name={m.icon} size={size==="sm"?11:13}/>{m.label}
+    </span>
+  );
+};
+
+const StarRating = ({ value, onChange, readOnly=false }) => (
+  <div style={{ display:"flex", gap:2 }}>
+    {[1,2,3,4,5].map(i => (
+      <span key={i} onClick={() => !readOnly && onChange && onChange(i)}
+        style={{ cursor:readOnly?"default":"pointer", color:i<=value?"#f59e0b":"rgba(255,255,255,0.15)", fontSize:14 }}>★</span>
+    ))}
+  </div>
+);
+
+const GlassCard = ({ children, style, onClick }) => {
+  const [hov, setHov] = useState(false);
+  return (
+    <div onClick={onClick} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
+      style={{
+        background: hov&&onClick
+          ? "linear-gradient(135deg, rgba(45,48,85,1) 0%, rgba(32,34,62,1) 100%)"
+          : "linear-gradient(135deg, rgba(30,32,60,1) 0%, rgba(20,22,44,1) 100%)",
+        border:`1px solid ${hov?"rgba(124,58,237,0.5)":"rgba(124,58,237,0.2)"}`,
+        borderRadius:14, transition:"all 0.2s", cursor:onClick?"pointer":"default",
+        boxShadow: hov ? "0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)" : "0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)",
+        ...style
+      }}>
+      {children}
+    </div>
+  );
+};
+
+const GameCard = ({ game, onOpen }) => {
+  const [hov, setHov] = useState(false);
+  const [imgErr, setImgErr] = useState(false);
+  const colors = ["#1a0a2e","#0a1a2e","#0a2e1a","#2e1a0a","#1a1a2e"];
+  const fallbackBg = colors[game.id % colors.length];
+  return (
+    <div onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={()=>onOpen&&onOpen(game)}
+      style={{ position:"relative", borderRadius:14, overflow:"hidden", aspectRatio:"2/3", cursor:"pointer", transform:hov?"translateY(-4px) scale(1.02)":"none", transition:"transform 0.2s, box-shadow 0.2s", boxShadow:hov?"0 16px 40px rgba(0,0,0,0.6),0 0 0 1px rgba(124,58,237,0.3)":"0 4px 16px rgba(0,0,0,0.4)" }}>
+      {!imgErr ? (
+        <img src={game.cover} alt={game.title} style={{ width:"100%", height:"100%", objectFit:"cover" }} onError={()=>setImgErr(true)}/>
+      ) : (
+        <div style={{ width:"100%", height:"100%", background:`linear-gradient(135deg, ${fallbackBg}, #0f0f1a)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ fontSize:32, opacity:0.3 }}>🎮</div>
+        </div>
+      )}
+      <div style={{ position:"absolute", inset:0, background:hov?"linear-gradient(180deg,rgba(0,0,0,0.1) 0%,rgba(0,0,0,0.9) 70%)":"linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,0.9) 100%)", transition:"background 0.2s" }}/>
+      <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"12px 10px 10px" }}>
+        <div style={{ fontSize:13, fontWeight:700, color:"#fff", marginBottom:4, lineHeight:1.3 }}>{game.title}</div>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <StatusBadge status={game.status}/>
+          {game.rating>0 && <div style={{ color:"#f59e0b", fontSize:11 }}>{"★".repeat(game.rating)}</div>}
+        </div>
+      </div>
+      {game.metacritic>0 && (
+        <div style={{ position:"absolute", top:8, right:8, background:game.metacritic>=90?"#22c55e":game.metacritic>=75?"#f59e0b":"#ef4444", color:"#000", borderRadius:6, padding:"2px 6px", fontSize:11, fontWeight:800 }}>{game.metacritic}</div>
+      )}
+    </div>
+  );
+};
+
+const Avatar = ({ name, size=36, style: sty }) => {
+  const colors = ["#7C3AED","#a855f7","#06b6d4","#22c55e","#f59e0b","#ef4444"];
+  const color = colors[name ? name.charCodeAt(0) % colors.length : 0];
+  return (
+    <div style={{ width:size, height:size, borderRadius:"50%", background:`linear-gradient(135deg,${color},${color}88)`, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontSize:size*0.35, fontWeight:700, flexShrink:0, border:"2px solid rgba(255,255,255,0.1)", ...sty }}>
+      {name ? name.slice(0,2).toUpperCase() : "??"}
+    </div>
+  );
+};
+
+const StatCard = ({ label, value, sub, icon, color="#7C3AED" }) => (
+  <GlassCard style={{ padding:"18px 20px", display:"flex", alignItems:"center", gap:14 }}>
+    <div style={{ width:44, height:44, borderRadius:12, background:`${color}18`, border:`1px solid ${color}30`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+      <Icon name={icon} size={20} style={{ color }}/>
+    </div>
+    <div>
+      <div style={{ fontSize:22, fontWeight:800, fontFamily:"var(--font2)", letterSpacing:"-0.03em" }}>{value}</div>
+      <div style={{ fontSize:12, color:"var(--text2)", fontWeight:500 }}>{label}</div>
+      {sub && <div style={{ fontSize:11, color:"var(--text3)", marginTop:1 }}>{sub}</div>}
+    </div>
+  </GlassCard>
+);
+
+const TopBar = ({ title, subtitle, actions, searchVal, onSearch }) => (
+  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:28, gap:16 }}>
+    <div>
+      <h1 style={{ fontFamily:"var(--font2)", fontWeight:700, fontSize:22, letterSpacing:"-0.02em" }}>{title}</h1>
+      {subtitle && <p style={{ fontSize:13, color:"var(--text3)", marginTop:2 }}>{subtitle}</p>}
+    </div>
+    <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+      {onSearch && (
+        <div style={{ position:"relative" }}>
+          <Icon name="search" size={14} style={{ position:"absolute", left:11, top:"50%", transform:"translateY(-50%)", color:"var(--text3)" }}/>
+          <input value={searchVal} onChange={e=>onSearch(e.target.value)} placeholder="Search games…"
+            style={{ background:"rgba(20,22,42,0.8)", border:"1px solid rgba(124,58,237,0.15)", borderRadius:10, padding:"7px 12px 7px 32px", color:"var(--text)", fontSize:13, outline:"none", width:200 }}/>
+        </div>
+      )}
+      {actions}
+    </div>
+  </div>
+);
+
+const Sidebar = ({ page, setPage }) => {
+  const nav = [
+    { id:"dashboard", label:"Dashboard", icon:"home" },
+    { id:"library",   label:"Library",   icon:"library" },
+    { id:"profile",   label:"Profile",   icon:"profile" },
+    { id:"lfg",       label:"Team-up",   icon:"lfg" },
+    { id:"stats",     label:"Stats",     icon:"stats" },
+  ];
+  return (
+    <aside style={{ width:220, flexShrink:0, height:"100vh", position:"sticky", top:0, display:"flex", flexDirection:"column", background:"rgba(8,9,15,0.95)", backdropFilter:"blur(20px)", borderRight:"1px solid rgba(124,58,237,0.12)", padding:"24px 0" }}>
+      <div style={{ padding:"0 20px 24px", borderBottom:"1px solid rgba(124,58,237,0.1)", marginBottom:8 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ width:34, height:34, borderRadius:10, background:"linear-gradient(135deg,#7C3AED,#a855f7)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <Icon name="zap" size={18} style={{ color:"#fff" }}/>
+          </div>
+          <div>
+            <div style={{ fontFamily:"var(--font2)", fontWeight:700, fontSize:16, color:"#fff", letterSpacing:"-0.02em" }}>GameStack</div>
+            <div style={{ fontSize:10, color:"var(--text3)", letterSpacing:"0.08em" }}>BETA</div>
+          </div>
+        </div>
+      </div>
+      <nav style={{ flex:1, padding:"0 12px", display:"flex", flexDirection:"column", gap:2 }}>
+        {nav.map(item => {
+          const active = page === item.id;
+          return (
+            <button key={item.id} onClick={()=>setPage(item.id)}
+              style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 12px", borderRadius:10, background:active?"rgba(124,58,237,0.15)":"transparent", color:active?"#a855f7":"var(--text2)", fontWeight:active?600:400, fontSize:14, transition:"all 0.15s", textAlign:"left", border:active?"1px solid rgba(124,58,237,0.2)":"1px solid transparent" }}>
+              <Icon name={item.icon} size={17}/>
+              {item.label}
+              {item.id==="lfg" && <span style={{ marginLeft:"auto", background:"#ef4444", color:"#fff", borderRadius:99, fontSize:10, padding:"1px 6px", fontWeight:700 }}>3</span>}
+            </button>
+          );
+        })}
+      </nav>
+      <div style={{ padding:"16px 16px 0", borderTop:"1px solid rgba(124,58,237,0.1)" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <Avatar name={DATA.user.displayName} size={34}/>
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontSize:13, fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{DATA.user.displayName}</div>
+            <div style={{ fontSize:11, color:"var(--text3)" }}>Lv.{DATA.user.level}</div>
+          </div>
+          <Icon name="settings" size={15} style={{ color:"var(--text3)" }}/>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+// ── PAGES ─────────────────────────────────────────────────────────────────────
+
+const LandingPage = ({ onEnter }) => {
+  const [hov, setHov] = useState(false);
+  return (
+    <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", position:"relative", overflow:"hidden", padding:"40px 24px" }}>
+      <div style={{ position:"absolute", top:"-10%", left:"20%", width:600, height:600, borderRadius:"50%", background:"radial-gradient(circle,rgba(124,58,237,0.15) 0%,transparent 70%)", pointerEvents:"none" }}/>
+      <div style={{ position:"absolute", bottom:"-5%", right:"15%", width:400, height:400, borderRadius:"50%", background:"radial-gradient(circle,rgba(168,85,247,0.1) 0%,transparent 70%)", pointerEvents:"none" }}/>
+      <div style={{ textAlign:"center", maxWidth:680, position:"relative", zIndex:1 }}>
+        <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(124,58,237,0.12)", border:"1px solid rgba(124,58,237,0.25)", borderRadius:99, padding:"6px 16px", marginBottom:32, fontSize:12, color:"#a855f7", fontWeight:600, letterSpacing:"0.08em" }}>
+          <Icon name="zap" size={12}/> GAMER'S INTEGRATED PORTFOLIO
+        </div>
+        <h1 style={{ fontFamily:"var(--font2)", fontSize:"clamp(48px,8vw,88px)", fontWeight:700, lineHeight:1.05, letterSpacing:"-0.04em", color:"#fff", marginBottom:16 }}>
+          Your Games.<br/>
+          <span style={{ background:"linear-gradient(90deg,#7C3AED,#c084fc,#a855f7)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>One Stack.</span>
+        </h1>
+        <p style={{ fontSize:"clamp(15px,2vw,18px)", color:"var(--text2)", lineHeight:1.7, maxWidth:520, margin:"0 auto 40px" }}>
+          Steam, PlayStation, Xbox — 모든 플랫폼의 게임 이력을 한 곳에. 나만의 게이머 포트폴리오를 만들고 공유하세요.
+        </p>
+        <div style={{ display:"flex", gap:12, justifyContent:"center", flexWrap:"wrap" }}>
+          <button onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={onEnter}
+            style={{ background:"linear-gradient(135deg,#7C3AED,#a855f7)", color:"#fff", padding:"13px 32px", borderRadius:12, fontSize:15, fontWeight:700, boxShadow:hov?"0 8px 30px rgba(124,58,237,0.5)":"0 4px 20px rgba(124,58,237,0.3)", transform:hov?"translateY(-2px)":"none", transition:"all 0.2s" }}>
+            지금 시작하기 →
+          </button>
+          <button style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.12)", color:"var(--text)", padding:"13px 28px", borderRadius:12, fontSize:15, fontWeight:500 }}>
+            둘러보기
+          </button>
+        </div>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16, maxWidth:860, width:"100%", marginTop:72, position:"relative", zIndex:1 }}>
+        {[
+          { icon:"library", title:"게임 라이브러리", desc:"Backlog·Playing·Completed·Dropped 상태로 체계적 관리", color:"#7C3AED" },
+          { icon:"stats",   title:"플레이 통계",   desc:"장르 분포, 총 플레이 시간, 월별 기록을 시각화", color:"#06b6d4" },
+          { icon:"lfg",     title:"LFG Team-up",  desc:"실시간으로 같이 게임할 팀원을 모집하세요", color:"#22c55e" },
+        ].map(f => (
+          <GlassCard key={f.title} style={{ padding:"24px", textAlign:"center" }}>
+            <div style={{ width:48, height:48, borderRadius:14, background:`${f.color}18`, border:`1px solid ${f.color}30`, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 14px" }}>
+              <Icon name={f.icon} size={22} style={{ color:f.color }}/>
+            </div>
+            <div style={{ fontWeight:700, fontSize:15, marginBottom:6, fontFamily:"var(--font2)" }}>{f.title}</div>
+            <div style={{ fontSize:13, color:"var(--text3)", lineHeight:1.6 }}>{f.desc}</div>
+          </GlassCard>
+        ))}
+      </div>
+      <div style={{ display:"flex", gap:32, marginTop:48, color:"var(--text3)", fontSize:13, position:"relative", zIndex:1 }}>
+        {[["2,400+","Active Gamers"],["15,000+","Games Tracked"],["98%","Uptime"]].map(([v,l]) => (
+          <div key={l} style={{ textAlign:"center" }}>
+            <div style={{ fontFamily:"var(--font2)", fontWeight:700, fontSize:22, color:"var(--text)", letterSpacing:"-0.03em" }}>{v}</div>
+            <div>{l}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const Dashboard = ({ setPage, setSelectedGame }) => {
+  const { user, library, activity } = DATA;
+  const playing = library.filter(g=>g.status==="playing");
+  const recentCompleted = library.filter(g=>g.status==="completed").slice(0,4);
+  return (
+    <div>
+      <TopBar title={`반가워요, ${user.displayName} 👋`} subtitle={`Lv.${user.level} · ${user.stats.totalGames} games tracked`}/>
+      <GlassCard style={{ padding:"16px 20px", marginBottom:20, display:"flex", alignItems:"center", gap:16 }}>
+        <Avatar name={user.displayName} size={48}/>
+        <div style={{ flex:1 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+            <span style={{ fontWeight:700, fontFamily:"var(--font2)" }}>Level {user.level}</span>
+            <span style={{ fontSize:12, color:"var(--text3)" }}>{user.xp.toLocaleString()} / {user.xpNext.toLocaleString()} XP</span>
+          </div>
+          <div style={{ height:6, background:"rgba(255,255,255,0.08)", borderRadius:99, overflow:"hidden" }}>
+            <div style={{ height:"100%", width:`${(user.xp/user.xpNext)*100}%`, background:"linear-gradient(90deg,#7C3AED,#a855f7)", borderRadius:99 }}/>
+          </div>
+        </div>
+        <div style={{ display:"flex", gap:6 }}>
+          {user.platforms.map(p=><span key={p} style={{ background:"rgba(124,58,237,0.12)", border:"1px solid rgba(124,58,237,0.2)", borderRadius:6, padding:"3px 8px", fontSize:11, color:"var(--accent3)" }}>{p}</span>)}
+        </div>
+      </GlassCard>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
+        <StatCard label="Total Games" value={user.stats.totalGames} icon="library" color="#7C3AED"/>
+        <StatCard label="Hours Played" value={`${user.stats.totalHours.toLocaleString()}h`} icon="clock" color="#06b6d4"/>
+        <StatCard label="Completed" value={user.stats.completed} icon="trophy" color="#22c55e"/>
+        <StatCard label="Playing Now" value={user.stats.playing} icon="gamepad" color="#f59e0b"/>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 300px", gap:20 }}>
+        <div>
+          <div style={{ fontSize:14, fontWeight:700, color:"var(--text2)", marginBottom:12, display:"flex", alignItems:"center", gap:8 }}>
+            <Icon name="gamepad" size={14} style={{ color:"#22c55e" }}/> Currently Playing
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))", gap:12, marginBottom:24 }}>
+            {playing.map(g=><GameCard key={g.id} game={g} onOpen={game=>{setSelectedGame(game);setPage("gameDetail");}}/>)}
+          </div>
+          <div style={{ fontSize:14, fontWeight:700, color:"var(--text2)", marginBottom:12, display:"flex", alignItems:"center", gap:8 }}>
+            <Icon name="trophy" size={14} style={{ color:"#7C3AED" }}/> Recently Completed
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))", gap:12 }}>
+            {recentCompleted.map(g=><GameCard key={g.id} game={g} onOpen={game=>{setSelectedGame(game);setPage("gameDetail");}}/>)}
+          </div>
+        </div>
+        <GlassCard style={{ padding:"18px", alignSelf:"start" }}>
+          <div style={{ fontSize:13, fontWeight:700, marginBottom:14, color:"var(--text2)", display:"flex", alignItems:"center", gap:6 }}>
+            <Icon name="zap" size={13} style={{ color:"#a855f7" }}/> Recent Activity
+          </div>
+          <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+            {activity.map((a,i)=>(
+              <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:10, paddingBottom:10, borderBottom:i<activity.length-1?"1px solid rgba(255,255,255,0.05)":"none" }}>
+                <div style={{ fontSize:18, flexShrink:0 }}>{a.icon}</div>
+                <div>
+                  <div style={{ fontSize:13, fontWeight:500 }}>{a.game}</div>
+                  <div style={{ fontSize:11, color:"var(--text3)", marginTop:2 }}>{a.type} · {a.time}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <button onClick={()=>setPage("library")} style={{ width:"100%", marginTop:14, padding:"9px", background:"rgba(124,58,237,0.1)", border:"1px solid rgba(124,58,237,0.2)", borderRadius:10, color:"var(--accent2)", fontSize:13, fontWeight:600 }}>
+            View Full Library →
+          </button>
+        </GlassCard>
+      </div>
+    </div>
+  );
+};
+
+const LibraryPage = ({ setSelectedGame, setPage }) => {
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState("grid");
+  const [sortBy, setSortBy] = useState("title");
+  const [library, setLibrary] = useState(DATA.library);
+  const [addOpen, setAddOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const tabs = [
+    { id:"all",       label:"All",       count:library.length },
+    { id:"playing",   label:"Playing",   count:library.filter(g=>g.status==="playing").length },
+    { id:"completed", label:"Completed", count:library.filter(g=>g.status==="completed").length },
+    { id:"backlog",   label:"Backlog",   count:library.filter(g=>g.status==="backlog").length },
+    { id:"dropped",   label:"Dropped",   count:library.filter(g=>g.status==="dropped").length },
+  ];
+
+  const filtered = useMemo(() => {
+    let res = library;
+    if (filter !== "all") res = res.filter(g=>g.status===filter);
+    if (search) res = res.filter(g=>g.title.toLowerCase().includes(search.toLowerCase()));
+    if (sortBy==="title") res=[...res].sort((a,b)=>a.title.localeCompare(b.title));
+    if (sortBy==="rating") res=[...res].sort((a,b)=>b.rating-a.rating);
+    if (sortBy==="hours") res=[...res].sort((a,b)=>b.hours-a.hours);
+    if (sortBy==="metacritic") res=[...res].sort((a,b)=>b.metacritic-a.metacritic);
+    return res;
+  }, [library, filter, search, sortBy]);
+
+  const handleSearch = useCallback((q) => {
+    setSearchQuery(q);
+    if (!q) { setSearchResults([]); return; }
+    const mock = [
+      { id:101, title:"Hollow Knight: Silksong", cover:"https://media.rawg.io/media/games/4cf/4cfc6b7f1850590a4634b08bfab308ab.jpg", metacritic:0, year:2024 },
+      { id:102, title:"Black Myth: Wukong",      cover:"https://media.rawg.io/media/games/b29/b294fdd866dcdb643e7bab370a552855.jpg", metacritic:82, year:2024 },
+      { id:103, title:"Palworld",                cover:"https://media.rawg.io/media/games/479/479c2b8ba9370eff7bb7a5a0ab8c80b0.jpg", metacritic:73, year:2024 },
+    ].filter(g=>g.title.toLowerCase().includes(q.toLowerCase()));
+    setSearchResults(mock);
+  }, []);
+
+  const addGame = game => {
+    setLibrary(prev=>[{ ...game, status:"backlog", rating:0, hours:0, genre:["Unknown"], platform:"Steam" }, ...prev]);
+    setAddOpen(false); setSearchQuery(""); setSearchResults([]);
+  };
+
+  return (
+    <div>
+      <TopBar title="My Library" subtitle={`${library.length} games tracked`} searchVal={search} onSearch={setSearch}
+        actions={
+          <button onClick={()=>setAddOpen(true)} style={{ display:"flex", alignItems:"center", gap:7, background:"linear-gradient(135deg,#7C3AED,#a855f7)", color:"#fff", padding:"8px 16px", borderRadius:10, fontSize:13, fontWeight:700, boxShadow:"0 4px 14px rgba(124,58,237,0.35)" }}>
+            <Icon name="plus" size={15}/> Add Game
+          </button>
+        }/>
+
+      <div style={{ display:"flex", gap:4, marginBottom:20, background:"rgba(14,15,26,0.5)", borderRadius:12, padding:4, border:"1px solid rgba(124,58,237,0.12)", width:"fit-content" }}>
+        {tabs.map(t=>(
+          <button key={t.id} onClick={()=>setFilter(t.id)}
+            style={{ padding:"7px 14px", borderRadius:9, fontSize:13, fontWeight:filter===t.id?700:400, background:filter===t.id?"rgba(124,58,237,0.2)":"transparent", color:filter===t.id?"#c084fc":"var(--text3)", border:filter===t.id?"1px solid rgba(124,58,237,0.3)":"1px solid transparent", transition:"all 0.15s" }}>
+            {t.label} <span style={{ opacity:0.6, fontSize:11, marginLeft:3 }}>{t.count}</span>
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
+        <div style={{ fontSize:13, color:"var(--text3)" }}>{filtered.length} games</div>
+        <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+          <select value={sortBy} onChange={e=>setSortBy(e.target.value)}
+            style={{ background:"rgba(14,15,26,0.8)", border:"1px solid rgba(124,58,237,0.15)", borderRadius:8, padding:"5px 10px", color:"var(--text2)", fontSize:12, outline:"none" }}>
+            <option value="title">Title A–Z</option>
+            <option value="rating">Rating</option>
+            <option value="hours">Hours</option>
+            <option value="metacritic">Metacritic</option>
+          </select>
+          {["grid","list"].map(v=>(
+            <button key={v} onClick={()=>setView(v)} style={{ padding:6, borderRadius:7, background:view===v?"rgba(124,58,237,0.2)":"transparent", color:view===v?"#a855f7":"var(--text3)" }}>
+              <Icon name={v} size={15}/>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {view==="grid" ? (
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))", gap:14 }}>
+          {filtered.map(g=><GameCard key={g.id} game={g} onOpen={game=>{setSelectedGame(game);setPage("gameDetail");}}/>)}
+        </div>
+      ) : (
+        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+          {filtered.map(g=>(
+            <GlassCard key={g.id} style={{ padding:"12px 16px", display:"flex", alignItems:"center", gap:14 }} onClick={()=>{setSelectedGame(g);setPage("gameDetail");}}>
+              <img src={g.cover} alt={g.title} style={{ width:48, height:64, objectFit:"cover", borderRadius:8, flexShrink:0 }}/>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontWeight:700, fontSize:14, marginBottom:4 }}>{g.title}</div>
+                <div style={{ display:"flex", gap:8, flexWrap:"wrap", alignItems:"center" }}>
+                  <StatusBadge status={g.status}/>
+                  {g.genre.map(ge=><span key={ge} style={{ fontSize:11, color:"var(--text3)", background:"rgba(255,255,255,0.05)", borderRadius:4, padding:"1px 6px" }}>{ge}</span>)}
+                </div>
+              </div>
+              <div style={{ display:"flex", gap:16, alignItems:"center", flexShrink:0 }}>
+                {g.metacritic>0&&<div style={{ background:g.metacritic>=90?"#22c55e":g.metacritic>=75?"#f59e0b":"#ef4444", color:"#000", borderRadius:6, padding:"2px 7px", fontSize:11, fontWeight:800 }}>{g.metacritic}</div>}
+                {g.hours>0&&<div style={{ fontSize:12, color:"var(--text3)" }}>{g.hours}h</div>}
+                <StarRating value={g.rating} readOnly/>
+                <Icon name="chevronRight" size={14} style={{ color:"var(--text3)" }}/>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      )}
+
+      {addOpen && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.7)", backdropFilter:"blur(8px)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:100 }}
+          onClick={e=>e.target===e.currentTarget&&setAddOpen(false)}>
+          <GlassCard style={{ width:480, padding:28, border:"1px solid rgba(124,58,237,0.3)" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+              <h3 style={{ fontFamily:"var(--font2)", fontWeight:700, fontSize:18 }}>게임 추가</h3>
+              <button onClick={()=>setAddOpen(false)}><Icon name="x" size={18} style={{ color:"var(--text3)" }}/></button>
+            </div>
+            <div style={{ position:"relative", marginBottom:16 }}>
+              <Icon name="search" size={15} style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", color:"var(--text3)" }}/>
+              <input value={searchQuery} onChange={e=>handleSearch(e.target.value)} placeholder="RAWG에서 게임 검색…"
+                style={{ width:"100%", background:"rgba(8,9,15,0.8)", border:"1px solid rgba(124,58,237,0.25)", borderRadius:10, padding:"10px 12px 10px 36px", color:"var(--text)", fontSize:14, outline:"none" }}/>
+            </div>
+            {searchResults.length>0 && (
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                {searchResults.map(g=>(
+                  <div key={g.id} onClick={()=>addGame(g)}
+                    style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 12px", background:"rgba(124,58,237,0.06)", border:"1px solid rgba(124,58,237,0.12)", borderRadius:10, cursor:"pointer" }}>
+                    <img src={g.cover} alt={g.title} style={{ width:36, height:48, objectFit:"cover", borderRadius:6 }}/>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontWeight:600, fontSize:14 }}>{g.title}</div>
+                      <div style={{ fontSize:12, color:"var(--text3)" }}>{g.year}{g.metacritic>0?` · MC ${g.metacritic}`:" · TBD"}</div>
+                    </div>
+                    <Icon name="plus" size={16} style={{ color:"#a855f7" }}/>
+                  </div>
+                ))}
+              </div>
+            )}
+            {searchQuery && searchResults.length===0 && <div style={{ textAlign:"center", color:"var(--text3)", padding:"20px 0", fontSize:13 }}>No results. Try another title.</div>}
+            {!searchQuery && (
+              <div style={{ display:"flex", flexDirection:"column", gap:6, fontSize:13, color:"var(--text3)" }}>
+                <div>💡 <strong style={{ color:"var(--text2)" }}>RAWG API</strong> 연동으로 게임 데이터를 자동으로 불러옵니다</div>
+                <div>· 게임 제목, 포스터, 장르, 메타스코어 자동 파싱</div>
+              </div>
+            )}
+          </GlassCard>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ProfilePage = () => {
+  const { user, library } = DATA;
+  const topGames = library.filter(g=>g.status==="completed"&&g.rating===5).slice(0,6);
+  return (
+    <div>
+      <TopBar title="My Profile" subtitle="gamestack.com/nova_striker"
+        actions={
+          <div style={{ display:"flex", gap:8 }}>
+            <button style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(124,58,237,0.1)", border:"1px solid rgba(124,58,237,0.2)", color:"#a855f7", padding:"7px 14px", borderRadius:10, fontSize:13, fontWeight:600 }}>
+              <Icon name="share" size={14}/> Share
+            </button>
+            <button style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.1)", color:"var(--text2)", padding:"7px 14px", borderRadius:10, fontSize:13, fontWeight:600 }}>
+              <Icon name="edit" size={14}/> Edit
+            </button>
+          </div>
+        }/>
+      <GlassCard style={{ padding:"28px", marginBottom:20, position:"relative", overflow:"hidden" }}>
+        <div style={{ position:"absolute", top:0, left:0, right:0, height:120, background:"linear-gradient(135deg,rgba(124,58,237,0.2),rgba(168,85,247,0.1))", borderBottom:"1px solid rgba(124,58,237,0.1)" }}/>
+        <div style={{ position:"relative", display:"flex", gap:20, alignItems:"flex-end" }}>
+          <Avatar name={user.displayName} size={80} sty={{ border:"4px solid rgba(124,58,237,0.4)", boxShadow:"0 0 24px rgba(124,58,237,0.3)", marginTop:40 }}/>
+          <div style={{ flex:1, paddingBottom:4 }}>
+            <div style={{ fontFamily:"var(--font2)", fontWeight:800, fontSize:24, letterSpacing:"-0.03em" }}>{user.displayName}</div>
+            <div style={{ color:"var(--text3)", fontSize:13, marginTop:3, display:"flex", alignItems:"center", gap:8 }}>
+              <span>@{user.id}</span> · <span>{user.location}</span> · <span>가입 {user.joinedYear}</span>
+            </div>
+            <div style={{ fontSize:13, color:"var(--text2)", marginTop:8, lineHeight:1.6, maxWidth:500 }}>{user.bio}</div>
+          </div>
+          <div style={{ display:"flex", gap:6, flexWrap:"wrap", alignSelf:"flex-start", marginTop:40 }}>
+            {user.platforms.map(p=><span key={p} style={{ background:"rgba(124,58,237,0.1)", border:"1px solid rgba(124,58,237,0.2)", borderRadius:7, padding:"4px 10px", fontSize:12, color:"var(--accent3)" }}>{p}</span>)}
+          </div>
+        </div>
+      </GlassCard>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
+        <StatCard label="Total Games" value={user.stats.totalGames} icon="library" color="#7C3AED"/>
+        <StatCard label="Completed" value={user.stats.completed} icon="trophy" color="#22c55e"/>
+        <StatCard label="Hours Logged" value={`${user.stats.totalHours.toLocaleString()}h`} icon="clock" color="#06b6d4"/>
+        <StatCard label="Backlog" value={user.stats.backlog} icon="bookmark" color="#f59e0b"/>
+      </div>
+      <div style={{ marginBottom:24 }}>
+        <div style={{ fontSize:14, fontWeight:700, color:"var(--text2)", marginBottom:12, display:"flex", alignItems:"center", gap:8 }}>
+          <Icon name="star" size={14} style={{ color:"#f59e0b" }}/> Top Rated Games (★★★★★)
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))", gap:12 }}>
+          {topGames.map(g=>(
+            <div key={g.id} style={{ borderRadius:12, overflow:"hidden", aspectRatio:"2/3", position:"relative" }}>
+              <img src={g.cover} alt={g.title} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
+              <div style={{ position:"absolute", inset:0, background:"linear-gradient(180deg,transparent 50%,rgba(0,0,0,0.85))" }}/>
+              <div style={{ position:"absolute", bottom:8, left:8, right:8, fontSize:11, fontWeight:700, color:"#fff" }}>{g.title}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <GlassCard style={{ padding:"20px 24px", display:"flex", alignItems:"center", gap:16 }}>
+        <div style={{ flex:1 }}>
+          <div style={{ fontWeight:700, marginBottom:4 }}>공개 프로필 링크</div>
+          <div style={{ fontSize:13, color:"var(--accent2)", fontFamily:"monospace" }}>gamestack.com/{user.id}</div>
+        </div>
+        <button style={{ display:"flex", alignItems:"center", gap:7, background:"linear-gradient(135deg,#7C3AED,#a855f7)", color:"#fff", padding:"9px 18px", borderRadius:10, fontSize:13, fontWeight:700 }}>
+          <Icon name="externalLink" size={14}/> 공유하기
+        </button>
+      </GlassCard>
+    </div>
+  );
+};
+
+const LFGPage = () => {
+  const [posts, setPosts] = useState(DATA.lfgPosts);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [form, setForm] = useState({ game:"", type:"Co-op", desc:"" });
+  const [filter, setFilter] = useState("all");
+
+  const submit = () => {
+    if (!form.game || !form.desc) return;
+    setPosts(prev=>[{ id:Date.now(), user:"nova_striker", game:form.game, type:form.type, desc:form.desc, online:true, tags:[], time:"방금" }, ...prev]);
+    setCreateOpen(false); setForm({ game:"", type:"Co-op", desc:"" });
+  };
+
+  return (
+    <div>
+      <TopBar title="Team-up · LFG" subtitle="실시간으로 같이 게임할 팀원을 찾아보세요"
+        actions={
+          <button onClick={()=>setCreateOpen(true)} style={{ display:"flex", alignItems:"center", gap:7, background:"linear-gradient(135deg,#7C3AED,#a855f7)", color:"#fff", padding:"8px 16px", borderRadius:10, fontSize:13, fontWeight:700 }}>
+            <Icon name="plus" size={15}/> 모집 올리기
+          </button>
+        }/>
+      <div style={{ display:"flex", gap:6, marginBottom:20, flexWrap:"wrap", alignItems:"center" }}>
+        {["all","Co-op","Party","Casual","Hunt","Guide"].map(f=>(
+          <button key={f} onClick={()=>setFilter(f)}
+            style={{ padding:"6px 14px", borderRadius:20, fontSize:12, fontWeight:600, background:filter===f?"rgba(124,58,237,0.2)":"rgba(255,255,255,0.04)", border:filter===f?"1px solid rgba(124,58,237,0.35)":"1px solid rgba(255,255,255,0.08)", color:filter===f?"#c084fc":"var(--text3)", transition:"all 0.15s" }}>
+            {f==="all"?"전체":f}
+          </button>
+        ))}
+        <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:6, fontSize:12, color:"var(--text3)" }}>
+          <div style={{ width:7, height:7, borderRadius:"50%", background:"#22c55e", boxShadow:"0 0 6px #22c55e" }}/>
+          {posts.filter(p=>p.online).length} online now
+        </div>
+      </div>
+      <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+        {posts.filter(p=>filter==="all"||p.type===filter).map(p=>(
+          <GlassCard key={p.id} style={{ padding:"18px 20px" }}>
+            <div style={{ display:"flex", gap:14, alignItems:"flex-start" }}>
+              <div style={{ position:"relative", flexShrink:0 }}>
+                <Avatar name={p.user} size={42}/>
+                {p.online&&<div style={{ position:"absolute", bottom:1, right:1, width:10, height:10, borderRadius:"50%", background:"#22c55e", border:"2px solid #0e0f1a", boxShadow:"0 0 6px #22c55e" }}/>}
+              </div>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                  <span style={{ fontWeight:700, fontSize:14 }}>{p.user}</span>
+                  <span style={{ background:"rgba(124,58,237,0.12)", border:"1px solid rgba(124,58,237,0.2)", borderRadius:6, padding:"2px 8px", fontSize:11, color:"#a855f7", fontWeight:600 }}>{p.type}</span>
+                  <span style={{ fontSize:11, color:"var(--text3)", marginLeft:"auto" }}>{p.time}</span>
+                </div>
+                <div style={{ fontWeight:700, fontSize:15, color:"var(--accent3)", marginBottom:4 }}>🎮 {p.game}</div>
+                <div style={{ fontSize:13, color:"var(--text2)", lineHeight:1.6, marginBottom:8 }}>{p.desc}</div>
+                <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+                  {p.tags.map(t=><span key={t} style={{ background:"rgba(255,255,255,0.05)", borderRadius:4, padding:"2px 7px", fontSize:11, color:"var(--text3)" }}>#{t}</span>)}
+                  <button style={{ marginLeft:"auto", background:"linear-gradient(135deg,#7C3AED,#a855f7)", color:"#fff", padding:"7px 16px", borderRadius:8, fontSize:12, fontWeight:700 }}>참여하기</button>
+                </div>
+              </div>
+            </div>
+          </GlassCard>
+        ))}
+      </div>
+      {createOpen && (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", backdropFilter:"blur(8px)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:100 }}
+          onClick={e=>e.target===e.currentTarget&&setCreateOpen(false)}>
+          <GlassCard style={{ width:480, padding:28, border:"1px solid rgba(124,58,237,0.3)" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+              <h3 style={{ fontFamily:"var(--font2)", fontWeight:700, fontSize:18 }}>팀원 모집하기</h3>
+              <button onClick={()=>setCreateOpen(false)}><Icon name="x" size={18} style={{ color:"var(--text3)" }}/></button>
+            </div>
+            <div style={{ marginBottom:14 }}>
+              <label style={{ display:"block", fontSize:12, color:"var(--text3)", marginBottom:5, fontWeight:600 }}>게임 이름</label>
+              <input value={form.game} onChange={e=>setForm(p=>({...p,game:e.target.value}))} placeholder="예: Elden Ring"
+                style={{ width:"100%", background:"rgba(8,9,15,0.8)", border:"1px solid rgba(124,58,237,0.2)", borderRadius:9, padding:"9px 12px", color:"var(--text)", fontSize:13, outline:"none" }}/>
+            </div>
+            <div style={{ marginBottom:14 }}>
+              <label style={{ display:"block", fontSize:12, color:"var(--text3)", marginBottom:5, fontWeight:600 }}>타입</label>
+              <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                {["Co-op","Party","Casual","Hunt","Guide"].map(t=>(
+                  <button key={t} onClick={()=>setForm(p=>({...p,type:t}))}
+                    style={{ padding:"5px 12px", borderRadius:20, fontSize:12, fontWeight:600, background:form.type===t?"rgba(124,58,237,0.2)":"transparent", border:form.type===t?"1px solid rgba(124,58,237,0.4)":"1px solid rgba(255,255,255,0.1)", color:form.type===t?"#c084fc":"var(--text3)" }}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginBottom:20 }}>
+              <label style={{ display:"block", fontSize:12, color:"var(--text3)", marginBottom:5, fontWeight:600 }}>모집 내용</label>
+              <textarea value={form.desc} onChange={e=>setForm(p=>({...p,desc:e.target.value}))} placeholder="어떤 팀원을 찾고 있나요?"
+                style={{ width:"100%", background:"rgba(8,9,15,0.8)", border:"1px solid rgba(124,58,237,0.2)", borderRadius:9, padding:"9px 12px", color:"var(--text)", fontSize:13, outline:"none", resize:"vertical", minHeight:80 }}/>
+            </div>
+            <button onClick={submit} style={{ width:"100%", background:"linear-gradient(135deg,#7C3AED,#a855f7)", color:"#fff", padding:"11px", borderRadius:10, fontWeight:700, fontSize:14 }}>게시하기</button>
+          </GlassCard>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const StatsPage = () => {
+  const { genreStats, monthlyHours, user } = DATA;
+  const maxH = Math.max(...genreStats.map(g=>g.hours));
+  const maxM = Math.max(...monthlyHours.map(m=>m.hours));
+  const cr = Math.round((user.stats.completed/user.stats.totalGames)*100);
+  return (
+    <div>
+      <TopBar title="Play Stats" subtitle={`${user.stats.totalGames}개 게임 · ${user.stats.totalHours.toLocaleString()}시간 기록`}/>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
+        <StatCard label="Total Hours" value={`${user.stats.totalHours.toLocaleString()}h`} icon="clock" color="#7C3AED"/>
+        <StatCard label="Completion Rate" value={`${cr}%`} icon="trophy" color="#22c55e" sub={`${user.stats.completed} of ${user.stats.totalGames}`}/>
+        <StatCard label="Avg per Game" value={`${Math.round(user.stats.totalHours/user.stats.totalGames)}h`} icon="fire" color="#f59e0b"/>
+        <StatCard label="Backlog Debt" value={user.stats.backlog} icon="bookmark" color="#ef4444"/>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20, marginBottom:20 }}>
+        <GlassCard style={{ padding:"22px" }}>
+          <div style={{ fontWeight:700, fontFamily:"var(--font2)", marginBottom:18, fontSize:15, display:"flex", alignItems:"center", gap:8 }}>
+            <Icon name="stats" size={15} style={{ color:"#a855f7" }}/> Genre Breakdown
+          </div>
+          <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+            {genreStats.map(g=>(
+              <div key={g.genre}>
+                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}>
+                  <span style={{ fontSize:13, fontWeight:600, color:"var(--text2)" }}>{g.genre}</span>
+                  <span style={{ fontSize:12, color:"var(--text3)" }}>{g.hours}h · {g.count} games</span>
+                </div>
+                <div style={{ height:6, background:"rgba(255,255,255,0.06)", borderRadius:99, overflow:"hidden" }}>
+                  <div style={{ height:"100%", width:`${(g.hours/maxH)*100}%`, background:`linear-gradient(90deg,${g.color},${g.color}88)`, borderRadius:99, transition:"width 0.8s ease" }}/>
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+        <GlassCard style={{ padding:"22px" }}>
+          <div style={{ fontWeight:700, fontFamily:"var(--font2)", marginBottom:18, fontSize:15 }}>Monthly Hours (6mo)</div>
+          <div style={{ display:"flex", alignItems:"flex-end", gap:10, height:160, paddingBottom:24, position:"relative" }}>
+            {monthlyHours.map(m=>(
+              <div key={m.month} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"flex-end", height:"100%", position:"relative" }}>
+                <div style={{ fontSize:11, color:"var(--text2)", fontWeight:600, marginBottom:4 }}>{m.hours}</div>
+                <div style={{ width:"100%", background:"linear-gradient(180deg,#7C3AED,#a855f7aa)", borderRadius:"6px 6px 0 0", height:`${(m.hours/maxM)*130}px`, minHeight:4 }}/>
+                <div style={{ position:"absolute", bottom:0, fontSize:11, color:"var(--text3)" }}>{m.month}</div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      </div>
+      <GlassCard style={{ padding:"22px" }}>
+        <div style={{ fontWeight:700, fontFamily:"var(--font2)", marginBottom:16, fontSize:15 }}>Library Status</div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12 }}>
+          {[
+            { key:"playing",   label:"Playing",   value:user.stats.playing,   color:"#22c55e", icon:"gamepad" },
+            { key:"completed", label:"Completed", value:user.stats.completed, color:"#7C3AED", icon:"trophy" },
+            { key:"backlog",   label:"Backlog",   value:user.stats.backlog,   color:"#f59e0b", icon:"bookmark" },
+            { key:"dropped",   label:"Dropped",   value:user.stats.dropped,   color:"#ef4444", icon:"x" },
+          ].map(s=>{
+            const pct = Math.round((s.value/user.stats.totalGames)*100);
+            return (
+              <div key={s.key} style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"16px", textAlign:"center" }}>
+                <Icon name={s.icon} size={20} style={{ color:s.color, margin:"0 auto 10px" }}/>
+                <div style={{ fontFamily:"var(--font2)", fontWeight:800, fontSize:28, letterSpacing:"-0.03em", color:s.color }}>{s.value}</div>
+                <div style={{ fontSize:12, color:"var(--text2)", fontWeight:600, marginBottom:6 }}>{s.label}</div>
+                <div style={{ height:4, background:"rgba(255,255,255,0.06)", borderRadius:99, overflow:"hidden" }}>
+                  <div style={{ height:"100%", width:`${pct}%`, background:s.color, borderRadius:99 }}/>
+                </div>
+                <div style={{ fontSize:11, color:"var(--text3)", marginTop:4 }}>{pct}%</div>
+              </div>
+            );
+          })}
+        </div>
+      </GlassCard>
+    </div>
+  );
+};
+
+const GameDetailPage = ({ game, goBack }) => {
+  const [rating, setRating] = useState(game?.rating||0);
+  const [status, setStatus] = useState(game?.status||"backlog");
+  const [review, setReview] = useState("");
+  if (!game) return <div style={{ padding:40, color:"var(--text3)" }}>No game selected.</div>;
+  const sm = STATUS_META[status];
+  return (
+    <div>
+      <button onClick={goBack} style={{ display:"flex", alignItems:"center", gap:6, color:"var(--text3)", fontSize:13, marginBottom:20 }}>
+        <Icon name="chevronLeft" size={15}/> Back to Library
+      </button>
+      <div style={{ position:"relative", borderRadius:20, overflow:"hidden", marginBottom:24, height:260 }}>
+        <img src={game.cover} alt={game.title} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
+        <div style={{ position:"absolute", inset:0, background:"linear-gradient(90deg,rgba(8,9,15,0.95) 30%,rgba(8,9,15,0.4))" }}/>
+        <div style={{ position:"absolute", inset:0, padding:"32px" }}>
+          <div style={{ display:"flex", gap:8, marginBottom:12, flexWrap:"wrap" }}>
+            {game.genre.map(g=><span key={g} style={{ background:"rgba(124,58,237,0.2)", border:"1px solid rgba(124,58,237,0.3)", borderRadius:6, padding:"3px 10px", fontSize:12, color:"#c084fc" }}>{g}</span>)}
+          </div>
+          <h1 style={{ fontFamily:"var(--font2)", fontWeight:800, fontSize:32, letterSpacing:"-0.03em", marginBottom:10 }}>{game.title}</h1>
+          <div style={{ display:"flex", gap:14, alignItems:"center", flexWrap:"wrap" }}>
+            <StatusBadge status={status} size="lg"/>
+            {game.metacritic>0&&<div style={{ background:game.metacritic>=90?"#22c55e":game.metacritic>=75?"#f59e0b":"#ef4444", color:"#000", borderRadius:8, padding:"4px 10px", fontSize:14, fontWeight:800 }}>MC {game.metacritic}</div>}
+            {game.hours>0&&<span style={{ fontSize:13, color:"var(--text2)" }}>⏱ {game.hours}h played</span>}
+            <span style={{ fontSize:13, color:"var(--text2)" }}>{game.platform}</span>
+          </div>
+        </div>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:24 }}>
+        <GlassCard style={{ padding:"18px 20px" }}>
+          <div style={{ fontSize:12, color:"var(--text3)", fontWeight:600, marginBottom:10 }}>STATUS</div>
+          <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+            {Object.entries(STATUS_META).map(([k,v])=>(
+              <button key={k} onClick={()=>setStatus(k)}
+                style={{ padding:"6px 12px", borderRadius:8, fontSize:12, fontWeight:600, background:status===k?v.bg:"transparent", border:`1px solid ${status===k?v.color+"55":"rgba(255,255,255,0.08)"}`, color:status===k?v.color:"var(--text3)", transition:"all 0.15s" }}>
+                {v.label}
+              </button>
+            ))}
+          </div>
+        </GlassCard>
+        <GlassCard style={{ padding:"18px 20px" }}>
+          <div style={{ fontSize:12, color:"var(--text3)", fontWeight:600, marginBottom:10 }}>YOUR RATING</div>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <StarRating value={rating} onChange={setRating}/>
+            <span style={{ fontSize:13, color:"var(--text2)" }}>{rating>0?["","Terrible","Bad","Okay","Good","Amazing"][rating]:"Rate this game"}</span>
+          </div>
+        </GlassCard>
+      </div>
+      <GlassCard style={{ padding:"20px" }}>
+        <div style={{ fontSize:13, fontWeight:700, marginBottom:10, color:"var(--text2)" }}>Write a Review</div>
+        <textarea value={review} onChange={e=>setReview(e.target.value)} placeholder="이 게임에 대한 생각을 남겨보세요…"
+          style={{ width:"100%", background:"rgba(8,9,15,0.5)", border:"1px solid rgba(124,58,237,0.15)", borderRadius:10, padding:"10px 14px", color:"var(--text)", fontSize:13, outline:"none", resize:"vertical", minHeight:90 }}/>
+        <div style={{ display:"flex", justifyContent:"flex-end", marginTop:10 }}>
+          <button style={{ background:"linear-gradient(135deg,#7C3AED,#a855f7)", color:"#fff", padding:"8px 20px", borderRadius:9, fontSize:13, fontWeight:700 }}>저장</button>
+        </div>
+      </GlassCard>
+    </div>
+  );
+};
+
+// ── APP ROOT ──────────────────────────────────────────────────────────────────
+const App = () => {
+  const [page, setPage] = useState("landing");
+  const [selectedGame, setSelectedGame] = useState(null);
+  const { tweaks, setTweak } = useTweaks(TWEAK_DEFAULTS);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--accent", tweaks.accentColor);
+    document.documentElement.style.setProperty("--accent2", tweaks.accentColor2);
+    document.documentElement.style.setProperty("--font", `'${tweaks.fontFamily}', sans-serif`);
+  }, [tweaks]);
+
+  if (page === "landing") return (
+    <>
+      <LandingPage onEnter={()=>setPage("dashboard")}/>
+      <TweaksPanel>
+        <TweakSection label="Colors">
+          <TweakColor label="Primary Accent" value={tweaks.accentColor} onChange={v=>setTweak("accentColor",v)}/>
+          <TweakColor label="Secondary Accent" value={tweaks.accentColor2} onChange={v=>setTweak("accentColor2",v)}/>
+        </TweakSection>
+        <TweakSection label="Layout">
+          <TweakSlider label="Glass Blur" value={tweaks.glassBlur} min={4} max={32} step={2} onChange={v=>setTweak("glassBlur",v)}/>
+          <TweakToggle label="Animations" value={tweaks.showAnimations} onChange={v=>setTweak("showAnimations",v)}/>
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+
+  return (
+    <div style={{ display:"flex", minHeight:"100vh" }}>
+      <Sidebar page={page==="gameDetail"?"library":page} setPage={setPage}/>
+      <main style={{ flex:1, padding:"32px 36px", overflowY:"auto" }}>
+        {page==="dashboard"  && <Dashboard setPage={setPage} setSelectedGame={setSelectedGame}/>}
+        {page==="library"    && <LibraryPage setSelectedGame={setSelectedGame} setPage={setPage}/>}
+        {page==="profile"    && <ProfilePage/>}
+        {page==="lfg"        && <LFGPage/>}
+        {page==="stats"      && <StatsPage/>}
+        {page==="gameDetail" && <GameDetailPage game={selectedGame} goBack={()=>setPage("library")}/>}
+      </main>
+      <TweaksPanel>
+        <TweakSection label="Colors">
+          <TweakColor label="Primary Accent" value={tweaks.accentColor} onChange={v=>setTweak("accentColor",v)}/>
+          <TweakColor label="Secondary Accent" value={tweaks.accentColor2} onChange={v=>setTweak("accentColor2",v)}/>
+        </TweakSection>
+        <TweakSection label="Layout">
+          <TweakSlider label="Glass Blur" value={tweaks.glassBlur} min={4} max={32} step={2} onChange={v=>setTweak("glassBlur",v)}/>
+          <TweakToggle label="Animations" value={tweaks.showAnimations} onChange={v=>setTweak("showAnimations",v)}/>
+          <TweakToggle label="Compact Mode" value={tweaks.compactMode} onChange={v=>setTweak("compactMode",v)}/>
+        </TweakSection>
+        <TweakSection label="Typography">
+          <TweakRadio label="Font" value={tweaks.fontFamily}
+            options={[{label:"Jakarta",value:"Plus Jakarta Sans"},{label:"Grotesk",value:"Space Grotesk"},{label:"Outfit",value:"Outfit"}]}
+            onChange={v=>setTweak("fontFamily",v)}/>
+        </TweakSection>
+      </TweaksPanel>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
