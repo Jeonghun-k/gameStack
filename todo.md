@@ -2,7 +2,7 @@
 
 약간 어떤거 해야될지 모르겠을 때 이걸 보면 좋을듯
 
-> PRD v1.0.0 기준 | 마지막 업데이트: 2026-05-04  
+> PRD v1.0.0 기준 | 마지막 업데이트: 2026-05-05  
 > 범례: ✅ 완료 · 🔄 진행중 · ⬜ 미완료
 ---
 
@@ -13,7 +13,7 @@
 - [x] ✅ `.gitignore` 설정 (.env 포함)
 - [x] ✅ GitHub 레포 연결 (`feat/auth`, `feat/library` 등 브랜치 전략 수립)
 - [ ] ⬜ `@supabase/supabase-js` 패키지 설치
-- [ ] ⬜ `react-router-dom` 패키지 설치 (URL 기반 라우팅)
+- [x] ✅ `react-router-dom` 패키지 설치 (URL 기반 라우팅)
 - [ ] ⬜ `.env` 파일 생성 및 팀원 공유 (카카오톡)
   - `VITE_SUPABASE_URL`
   - `VITE_SUPABASE_ANON_KEY`
@@ -223,11 +223,8 @@
 
 ## 10. 라우팅 (react-router-dom)
 
-> 현재: App.jsx에서 `useState`로 페이지 전환 (URL 변경 없음)
-npm install react-router-dom 으로 다운
-
-- [ ] ⬜ `react-router-dom` 설치 및 설정
-- [ ] ⬜ URL 기반 라우팅으로 전환
+- [x] ✅ `react-router-dom` 설치 및 설정
+- [x] ✅ URL 기반 라우팅으로 전환
   - `/` — LandingPage
   - `/dashboard` — Dashboard
   - `/library` — LibraryPage
@@ -236,7 +233,7 @@ npm install react-router-dom 으로 다운
   - `/lfg` — LFGPage
   - `/stats` — StatsPage
   - `/game/:id` — GameDetailPage
-- [ ] ⬜ Protected Route 컴포넌트 — 미로그인 시 `/`로 리다이렉트
+- [ ] ⬜ Protected Route 컴포넌트 — 미로그인 시 `/`로 리다이렉트 (AuthContext 완성 후)
 
 ---
 
