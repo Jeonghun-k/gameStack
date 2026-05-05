@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import GlassCard from '../components/GlassCard';
 import GameCard from '../components/GameCard';
 import StarRating from '../components/StarRating';
@@ -7,7 +8,8 @@ import TopBar from '../components/TopBar';
 import Icon from '../components/Icon';
 import mockData from '../data/mockData';
 
-export default function LibraryPage({ setSelectedGame, setPage }) {
+export default function LibraryPage() {
+  const navigate = useNavigate();
   const [filter, setFilter]               = useState("all");
   const [search, setSearch]               = useState("");
   const [view, setView]                   = useState("grid");
@@ -111,7 +113,7 @@ export default function LibraryPage({ setSelectedGame, setPage }) {
       {view === "grid" ? (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(140px,1fr))", gap: 14 }}>
           {filtered.map((g) => (
-            <GameCard key={g.id} game={g} onOpen={(game) => { setSelectedGame(game); setPage("gameDetail"); }} />
+            <GameCard key={g.id} game={g} onOpen={(game) => navigate(`/game/${game.id}`)} />
           ))}
         </div>
       ) : (
@@ -120,7 +122,7 @@ export default function LibraryPage({ setSelectedGame, setPage }) {
             <GlassCard
               key={g.id}
               style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 14 }}
-              onClick={() => { setSelectedGame(g); setPage("gameDetail"); }}
+              onClick={() => navigate(`/game/${g.id}`)}
             >
               <img src={g.cover} alt={g.title} style={{ width: 48, height: 64, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>

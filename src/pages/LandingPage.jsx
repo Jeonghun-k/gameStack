@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import GlassCard from '../components/GlassCard';
 import Icon from '../components/Icon';
 
-export default function LandingPage({ onEnter }) {
+export default function LandingPage() {
+  const navigate = useNavigate();
   const [hov, setHov] = useState(false);
 
   return (
@@ -39,7 +41,7 @@ export default function LandingPage({ onEnter }) {
           <button
             onMouseEnter={() => setHov(true)}
             onMouseLeave={() => setHov(false)}
-            onClick={onEnter}
+            onClick={() => navigate('/dashboard')}
             style={{
               background: "linear-gradient(135deg,#7C3AED,#a855f7)",
               color: "#fff",

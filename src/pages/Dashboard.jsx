@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import GlassCard from '../components/GlassCard';
 import GameCard from '../components/GameCard';
 import Avatar from '../components/Avatar';
@@ -6,7 +7,8 @@ import TopBar from '../components/TopBar';
 import Icon from '../components/Icon';
 import mockData from '../data/mockData';
 
-export default function Dashboard({ setPage, setSelectedGame }) {
+export default function Dashboard() {
+  const navigate = useNavigate();
   const { user, library, activity } = mockData;
   const playing = library.filter((g) => g.status === "playing");
   const recentCompleted = library.filter((g) => g.status === "completed").slice(0, 4);
@@ -39,10 +41,10 @@ export default function Dashboard({ setPage, setSelectedGame }) {
       </GlassCard>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 24 }}>
-        <StatCard label="Total Games"  value={user.stats.totalGames}                    icon="library" color="#7C3AED" />
+        <StatCard label="Total Games"  value={user.stats.totalGames}                       icon="library" color="#7C3AED" />
         <StatCard label="Hours Played" value={`${user.stats.totalHours.toLocaleString()}h`} icon="clock"   color="#06b6d4" />
-        <StatCard label="Completed"    value={user.stats.completed}                      icon="trophy"  color="#22c55e" />
-        <StatCard label="Playing Now"  value={user.stats.playing}                        icon="gamepad" color="#f59e0b" />
+        <StatCard label="Completed"    value={user.stats.completed}                         icon="trophy"  color="#22c55e" />
+        <StatCard label="Playing Now"  value={user.stats.playing}                           icon="gamepad" color="#f59e0b" />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20 }}>
@@ -52,7 +54,7 @@ export default function Dashboard({ setPage, setSelectedGame }) {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(130px,1fr))", gap: 12, marginBottom: 24 }}>
             {playing.map((g) => (
-              <GameCard key={g.id} game={g} onOpen={(game) => { setSelectedGame(game); setPage("gameDetail"); }} />
+              <GameCard key={g.id} game={g} onOpen={(game) => navigate(`/game/${game.id}`)} />
             ))}
           </div>
 
@@ -61,7 +63,7 @@ export default function Dashboard({ setPage, setSelectedGame }) {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(130px,1fr))", gap: 12 }}>
             {recentCompleted.map((g) => (
-              <GameCard key={g.id} game={g} onOpen={(game) => { setSelectedGame(game); setPage("gameDetail"); }} />
+              <GameCard key={g.id} game={g} onOpen={(game) => navigate(`/game/${game.id}`)} />
             ))}
           </div>
         </div>
@@ -82,7 +84,7 @@ export default function Dashboard({ setPage, setSelectedGame }) {
             ))}
           </div>
           <button
-            onClick={() => setPage("library")}
+            onClick={() => navigate('/library')}
             style={{ width: "100%", marginTop: 14, padding: "9px", background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 10, color: "var(--accent2)", fontSize: 13, fontWeight: 600 }}
           >
             View Full Library →

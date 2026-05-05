@@ -224,6 +224,7 @@
 ## 10. 라우팅 (react-router-dom)
 
 > 현재: App.jsx에서 `useState`로 페이지 전환 (URL 변경 없음)
+npm install react-router-dom 으로 다운
 
 - [ ] ⬜ `react-router-dom` 설치 및 설정
 - [ ] ⬜ URL 기반 라우팅으로 전환

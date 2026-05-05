@@ -1,3 +1,4 @@
+import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from './Icon';
 import Avatar from './Avatar';
 import mockData from '../data/mockData';
@@ -10,8 +11,11 @@ const nav = [
   { id: "stats",     label: "Stats",     icon: "stats" },
 ];
 
-export default function Sidebar({ page, setPage }) {
+export default function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user } = mockData;
+
   return (
     <aside style={{
       width: 220,
@@ -50,11 +54,12 @@ export default function Sidebar({ page, setPage }) {
 
       <nav style={{ flex: 1, padding: "0 12px", display: "flex", flexDirection: "column", gap: 2 }}>
         {nav.map((item) => {
-          const active = page === item.id;
+          const active = location.pathname === `/${item.id}` ||
+            (item.id === "library" && location.pathname.startsWith("/game"));
           return (
             <button
               key={item.id}
-              onClick={() => setPage(item.id)}
+              onClick={() => navigate(`/${item.id}`)}
               style={{
                 display: "flex",
                 alignItems: "center",

@@ -1,23 +1,29 @@
 import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import GlassCard from '../components/GlassCard';
 import StatusBadge from '../components/StatusBadge';
 import StarRating from '../components/StarRating';
 import Icon from '../components/Icon';
 import { STATUS_META } from '../components/StatusBadge';
+import mockData from '../data/mockData';
 
-export default function GameDetailPage({ game, goBack }) {
+export default function GameDetailPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const game = mockData.library.find((g) => g.id === Number(id));
+
   const [rating, setRating] = useState(game?.rating || 0);
   const [status, setStatus] = useState(game?.status || "backlog");
   const [review, setReview] = useState("");
 
   if (!game) {
-    return <div style={{ padding: 40, color: "var(--text3)" }}>No game selected.</div>;
+    return <div style={{ padding: 40, color: "var(--text3)" }}>게임을 찾을 수 없습니다.</div>;
   }
 
   return (
     <div>
       <button
-        onClick={goBack}
+        onClick={() => navigate('/library')}
         style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text3)", fontSize: 13, marginBottom: 20 }}
       >
         <Icon name="chevronLeft" size={15} /> Back to Library
