@@ -12,9 +12,9 @@
 - [x] ✅ ESLint 설정
 - [x] ✅ `.gitignore` 설정 (.env 포함)
 - [x] ✅ GitHub 레포 연결 (`feat/auth`, `feat/library` 등 브랜치 전략 수립)
-- [ ] ⬜ `@supabase/supabase-js` 패키지 설치
+- [x] ✅ `@supabase/supabase-js` 패키지 설치
 - [x] ✅ `react-router-dom` 패키지 설치 (URL 기반 라우팅)
-- [ ] ⬜ `.env` 파일 생성 및 팀원 공유 (카카오톡)
+- [x] ✅ `.env` 파일 생성 및 팀원 공유 (카카오톡)
   - `VITE_SUPABASE_URL`
   - `VITE_SUPABASE_ANON_KEY`
   - `VITE_RAWG_KEY`
