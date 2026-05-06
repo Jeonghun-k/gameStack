@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from './Icon';
 import Avatar from './Avatar';
-import mockData from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
 
 const nav = [
   { id: "dashboard", label: "Dashboard", icon: "home" },
@@ -14,7 +15,18 @@ const nav = [
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = mockData;
+  const { user, signOut } = useAuth();
+  const [showMenu, setShowMenu] = useState(false);
+
+  const displayName = user?.user_metadata?.full_name
+    ?? user?.user_metadata?.name
+    ?? user?.email?.split('@')[0]
+    ?? 'Gamer';
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <aside style={{
@@ -87,17 +99,50 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div style={{ padding: "16px 16px 0", borderTop: "1px solid rgba(124,58,237,0.1)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Avatar name={user.displayName} size={34} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {user.displayName}
-            </div>
-            <div style={{ fontSize: 11, color: "var(--text3)" }}>Lv.{user.level}</div>
+      <div style={{ padding: "16px 16px 0", borderTop: "1px solid rgba(124,58,237,0.1)", position: "relative" }}>
+        {showMenu && (
+          <div style={{
+            position: "absolute",
+            bottom: "calc(100% + 8px)",
+            left: 12,
+            right: 12,
+            background: "rgba(18,19,28,0.98)",
+            border: "1px solid rgba(124,58,237,0.2)",
+            borderRadius: 10,
+            overflow: "hidden",
+          }}>
+            <button
+              onClick={handleSignOut}
+              style={{
+                width: "100%",
+                padding: "11px 14px",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                color: "#ef4444",
+                fontSize: 13,
+                fontWeight: 600,
+                textAlign: "left",
+              }}
+            >
+              <Icon name="logout" size={15} style={{ color: "#ef4444" }} />
+              로그아웃
+            </button>
           </div>
-          <Icon name="settings" size={15} style={{ color: "var(--text3)" }} />
-        </div>
+        )}
+        <button
+          onClick={() => setShowMenu((v) => !v)}
+          style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "4px 0" }}
+        >
+          <Avatar name={displayName} size={34} />
+          <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+            <div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--text)" }}>
+              {displayName}
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text3)" }}>{user?.email}</div>
+          </div>
+          <Icon name="chevron" size={13} style={{ color: "var(--text3)", transform: showMenu ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+        </button>
       </div>
     </aside>
   );

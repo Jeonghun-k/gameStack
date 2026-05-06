@@ -2,17 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GlassCard from '../components/GlassCard';
 import Icon from '../components/Icon';
-
-// TODO: AuthContext 연결 후 아래 import 추가 필요
-// import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [hov, setHov] = useState(false);
-
-  // TODO: AuthContext 연결 후 아래 코드로 교체
-  // const { signInWithGoogle } = useAuth();
-  // 로그인 성공 시 navigate('/dashboard')는 AuthContext의 onAuthStateChange에서 처리
+  const { signInWithGoogle, signInWithDiscord } = useAuth();
 
   return (
     <div style={{
@@ -48,7 +43,7 @@ export default function LandingPage() {
           <button
             onMouseEnter={() => setHov(true)}
             onMouseLeave={() => setHov(false)}
-            onClick={() => navigate('/dashboard')}
+            onClick={signInWithGoogle}
             style={{
               background: "linear-gradient(135deg,#7C3AED,#a855f7)",
               color: "#fff",
@@ -61,10 +56,13 @@ export default function LandingPage() {
               transition: "all 0.2s",
             }}
           >
-            지금 시작하기 →
+            Google로 시작하기 →
           </button>
-          <button style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "var(--text)", padding: "13px 28px", borderRadius: 12, fontSize: 15, fontWeight: 500 }}>
-            둘러보기
+          <button
+            onClick={signInWithDiscord}
+            style={{ background: "#5865F2", border: "1px solid #4752C4", color: "#fff", padding: "13px 28px", borderRadius: 12, fontSize: 15, fontWeight: 600 }}
+          >
+            Discord로 시작하기
           </button>
         </div>
       </div>

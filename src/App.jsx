@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
@@ -7,6 +7,7 @@ import ProfilePage from './pages/ProfilePage';
 import LFGPage from './pages/LFGPage';
 import StatsPage from './pages/StatsPage';
 import GameDetailPage from './pages/GameDetailPage';
+import { useAuth } from './context/AuthContext';
 
 function Layout() {
   return (
@@ -27,10 +28,13 @@ function Layout() {
 }
 
 export default function App() {
+  const { user } = useAuth();
+
   return (
     <Routes>
-      <Route path="/"   element={<LandingPage />} />
-      <Route path="/*"  element={<Layout />} />
+      {/* 로그인된 상태로 루트 접근 시 대시보드로 이동 */}
+      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
+      <Route path="/*" element={<Layout />} />
     </Routes>
   );
 }
