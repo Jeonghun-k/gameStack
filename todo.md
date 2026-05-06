@@ -122,7 +122,7 @@
 
 > 브랜치: `feat/search`
 
-- [ ] ⬜ RAWG API 키 발급 후 `.env` 등록
+- [x] ✅ RAWG API 키 발급 후 `.env` 등록
 - [x] ✅ `src/lib/rawg.js` 작성
   - `searchGames(query)` — `/games?search={query}`
   - `getGameDetail(id)` — `/games/{id}`
@@ -254,7 +254,7 @@
 
 | 팀원 | 담당 | 상태 |
 |------|------|------|
-| 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | 🔄 진행중 (Google/Discord 로그인·로그아웃·세션 복원 완료 / Protected Route·profiles upsert 미완료) |
+| 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | 🔄 진행중 (Discord 로그인 구현, Google로 전환 필요) |
 | 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ RAWG 연동 완료 / ⬜ Supabase 연동 미완료 |
 | 팀원 C | 컴포넌트/UI (components 전체, ProfilePage, LFGPage, StatsPage) | ✅ UI 완료 / ⬜ 연동 미완료 |
 
