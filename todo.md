@@ -45,9 +45,9 @@
 - [x] ✅ `src/main.jsx`
 - [ ] ⬜ `src/context/AuthContext.jsx` — 전역 로그인 상태 관리
 - [ ] ⬜ `src/hooks/useLibrary.js` — 라이브러리 CRUD 훅
-- [ ] ⬜ `src/hooks/useSearch.js` — RAWG 검색 훅
+- [x] ✅ `src/hooks/useSearch.js` — RAWG 검색 훅
 - [ ] ⬜ `src/lib/supabase.js` — Supabase 클라이언트 초기화
-- [ ] ⬜ `src/lib/rawg.js` — RAWG API 호출 함수 모음
+- [x] ✅ `src/lib/rawg.js` — RAWG API 호출 함수 모음
 
 ---
 
@@ -115,19 +115,20 @@
 
 ---
 
-## 4. RAWG API 연동 (PRD §7-1) — 담당: 팀원 A
+## 4. RAWG API 연동 (PRD §7-1) — 담당: 팀원 B
 
 > 브랜치: `feat/search`
 
 - [ ] ⬜ RAWG API 키 발급 후 `.env` 등록
-- [ ] ⬜ `src/lib/rawg.js` 작성
+- [x] ✅ `src/lib/rawg.js` 작성
   - `searchGames(query)` — `/games?search={query}`
   - `getGameDetail(id)` — `/games/{id}`
-- [ ] ⬜ `src/hooks/useSearch.js` 작성
+- [x] ✅ `src/hooks/useSearch.js` 작성
   - 검색어 디바운싱 처리
   - 로딩 / 에러 상태 관리
-- [ ] ⬜ **[P0]** LibraryPage 게임 추가 모달 — 실제 RAWG 검색으로 교체
-- [ ] ⬜ **[P0]** GameDetailPage — RAWG 상세 API로 게임 설명 표시
+- [x] ✅ `src/hooks/useGameDetail.js` 작성 (추가 구현)
+- [x] ✅ **[P0]** LibraryPage 게임 추가 모달 — 실제 RAWG 검색으로 교체
+- [x] ✅ **[P0]** GameDetailPage — RAWG 상세 API로 게임 설명 표시
 
 ---
 
@@ -250,8 +251,8 @@
 
 | 팀원 | 담당 | 상태 |
 |------|------|------|
-| 팀원 A | DB/백엔드 (supabase.js, AuthContext, useLibrary, useSearch, rawg.js) | ⬜ 미시작 |
-| 팀원 B | 페이지 UI (LandingPage, Dashboard, LibraryPage, GameDetailPage) | ✅ UI 완료 / ⬜ 연동 미완료 |
+| 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | 🔄 진행중 (Discord 로그인 구현, Google로 전환 필요) |
+| 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ RAWG 연동 완료 / ⬜ Supabase 연동 미완료 |
 | 팀원 C | 컴포넌트/UI (components 전체, ProfilePage, LFGPage, StatsPage) | ✅ UI 완료 / ⬜ 연동 미완료 |
 
 ---
