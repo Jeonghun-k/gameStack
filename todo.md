@@ -43,10 +43,10 @@
 - [x] ✅ `src/styles/global.css`
 - [x] ✅ `src/App.jsx`
 - [x] ✅ `src/main.jsx`
-- [ ] ⬜ `src/context/AuthContext.jsx` — 전역 로그인 상태 관리
-- [ ] ⬜ `src/hooks/useLibrary.js` — 라이브러리 CRUD 훅
+- [x] ✅ `src/context/AuthContext.jsx` — 전역 로그인 상태 관리
+- [x] ✅ `src/hooks/useLibrary.js` — 라이브러리 CRUD 훅
 - [x] ✅ `src/hooks/useSearch.js` — RAWG 검색 훅
-- [ ] ⬜ `src/lib/supabase.js` — Supabase 클라이언트 초기화
+- [x] ✅ `src/lib/supabase.js` — Supabase 클라이언트 초기화
 - [x] ✅ `src/lib/rawg.js` — RAWG API 호출 함수 모음
 
 ---
@@ -54,18 +54,18 @@
 ## 2. Supabase 설정 (PRD §4, §7-2)
 
 ### 2-1. 프로젝트 생성
-- [ ] ⬜ Supabase 프로젝트 생성
-- [ ] ⬜ API URL / Anon Key 발급 후 `.env` 등록
+- [x] ✅ Supabase 프로젝트 생성
+- [x] ✅ API URL / Anon Key 발급 후 `.env` 등록
 
 ### 2-2. 테이블 생성
-- [ ] ⬜ `profiles` 테이블 생성
+- [x] ✅ `profiles` 테이블 생성
   - `id` (uuid, PK = auth.users.id)
   - `email` (text)
   - `nickname` (text)
   - `is_admin` (boolean, default: false)
   - `created_at` (timestamp)
   - `banned_at` (timestamp, nullable)
-- [ ] ⬜ `games` 테이블 생성
+- [x] ✅ `games` 테이블 생성
   - `id` (uuid, PK)
   - `user_id` (uuid, FK → auth.users)
   - `rawg_id` (integer)
@@ -75,13 +75,13 @@
   - `metacritic` (integer)
   - `status` (text: backlog/playing/completed/dropped)
   - `created_at` (timestamp)
-- [ ] ⬜ `comments` 테이블 생성
+- [x] ✅ `comments` 테이블 생성
   - `id` (uuid, PK)
   - `user_id` (uuid, FK → auth.users)
   - `game_id` (integer)
   - `text` (text)
   - `created_at` (timestamp)
-- [ ] ⬜ `ratings` 테이블 생성
+- [x] ✅ `ratings` 테이블 생성
   - `id` (uuid, PK)
   - `user_id` (uuid, FK → auth.users)
   - `game_id` (integer)
@@ -89,10 +89,10 @@
   - UNIQUE(user_id, game_id)
 
 ### 2-3. RLS (Row Level Security) 설정
-- [ ] ⬜ `games` 테이블 — 본인 데이터만 CRUD 허용
-- [ ] ⬜ `comments` 테이블 — 조회는 전체, 작성/삭제는 본인만
-- [ ] ⬜ `ratings` 테이블 — 본인 데이터만 CRUD 허용
-- [ ] ⬜ `profiles` 테이블 — 조회는 전체, 수정은 본인만
+- [x] ✅ `games` 테이블 — 본인 데이터만 CRUD 허용
+- [x] ✅ `comments` 테이블 — 조회는 전체, 작성/삭제는 본인만
+- [x] ✅ `ratings` 테이블 — 본인 데이터만 CRUD 허용
+- [x] ✅ `profiles` 테이블 — 조회는 전체, 수정은 본인만
 
 ---
 
@@ -100,15 +100,18 @@
 
 > 브랜치: `feat/auth`
 
-- [ ] ⬜ `src/lib/supabase.js` 작성 — createClient 초기화
-- [ ] ⬜ `src/context/AuthContext.jsx` 작성
-  - Google OAuth 로그인 함수
-  - 로그아웃 함수
-  - 세션 상태 구독 (`onAuthStateChange`)
-  - 전역 `user` 상태 제공
-- [ ] ⬜ **[P0]** Google 소셜 로그인 버튼 연결 (LandingPage)
-- [ ] ⬜ **[P0]** 로그아웃 버튼 연결 (Sidebar)
-- [ ] ⬜ **[P0]** 새로고침 후 세션 복원 (AuthContext에서 처리)
+- [x] ✅ `src/lib/supabase.js` 작성 — createClient 초기화
+- [x] ✅ `src/context/AuthContext.jsx` 작성
+  - [x] ✅ Google OAuth 로그인 함수
+  - [x] ✅ Discord OAuth 로그인 함수
+  - [x] ✅ 로그아웃 함수
+  - [x] ✅ 세션 상태 구독 (`onAuthStateChange`)
+  - [x] ✅ 전역 `user` 상태 제공
+- [x] ✅ **[P0]** Google / Discord 소셜 로그인 버튼 연결 (LandingPage)
+- [x] ✅ **[P0]** 로그인 후 `/dashboard` 자동 리다이렉트
+- [x] ✅ **[P0]** 로그아웃 버튼 연결 (Sidebar 유저 팝업 메뉴)
+- [x] ✅ **[P0]** 새로고침 후 세션 복원 (AuthContext에서 처리)
+- [x] ✅ Sidebar 유저 정보 실데이터 표시 (mockData 제거)
 - [ ] ⬜ **[P1]** 비로그인 접근 제한 — Library, Profile, LFG, Stats 페이지 보호
   - 미로그인 시 LandingPage로 리다이렉트
 - [ ] ⬜ 로그인 후 `profiles` 테이블에 유저 정보 자동 upsert
@@ -251,7 +254,7 @@
 
 | 팀원 | 담당 | 상태 |
 |------|------|------|
-| 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | 🔄 진행중 (Discord 로그인 구현, Google로 전환 필요) |
+| 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | 🔄 진행중 (Google/Discord 로그인·로그아웃·세션 복원 완료 / Protected Route·profiles upsert 미완료) |
 | 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ RAWG 연동 완료 / ⬜ Supabase 연동 미완료 |
 | 팀원 C | 컴포넌트/UI (components 전체, ProfilePage, LFGPage, StatsPage) | ✅ UI 완료 / ⬜ 연동 미완료 |
 
