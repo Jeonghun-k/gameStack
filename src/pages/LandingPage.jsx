@@ -3,9 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import GlassCard from '../components/GlassCard';
 import Icon from '../components/Icon';
 
+// TODO: AuthContext 연결 후 아래 import 추가 필요
+// import { useAuth } from '../context/AuthContext';
+
 export default function LandingPage() {
   const navigate = useNavigate();
   const [hov, setHov] = useState(false);
+
+  // TODO: AuthContext 연결 후 아래 코드로 교체
+  // const { signInWithGoogle } = useAuth();
+  // 로그인 성공 시 navigate('/dashboard')는 AuthContext의 onAuthStateChange에서 처리
 
   return (
     <div style={{
