@@ -43,7 +43,7 @@ export default function Sidebar() {
       padding: "24px 0",
     }}>
       <div style={{ padding: "0 20px 24px", borderBottom: "1px solid rgba(124,58,237,0.1)", marginBottom: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div onClick={() => navigate('/')} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
           <div style={{
             width: 34,
             height: 34,
