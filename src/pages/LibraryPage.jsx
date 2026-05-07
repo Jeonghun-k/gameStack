@@ -77,7 +77,7 @@ export default function LibraryPage() {
       {view === "grid" ? (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(140px,1fr))", gap: 14 }}>
           {filtered.map((g) => (
-            <GameCard key={g.id} game={g} onOpen={(game) => navigate(`/game/${game.id}`)} />
+            <GameCard key={g.id} game={g} onOpen={(game) => navigate(`/game/${game.rawg_id}`)} />
           ))}
         </div>
       ) : (
@@ -86,7 +86,7 @@ export default function LibraryPage() {
             <GlassCard
               key={g.id}
               style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 14 }}
-              onClick={() => navigate(`/game/${g.id}`)}
+              onClick={() => navigate(`/game/${g.rawg_id}`)}
             >
               <img src={g.cover} alt={g.title} style={{ width: 48, height: 64, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
