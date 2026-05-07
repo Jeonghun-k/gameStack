@@ -2,7 +2,7 @@
 
 약간 어떤거 해야될지 모르겠을 때 이걸 보면 좋을듯
 
-> PRD v1.0.0 기준 | 마지막 업데이트: 2026-05-05  
+> PRD v1.0.0 기준 | 마지막 업데이트: 2026-05-07  
 > 범례: ✅ 완료 · 🔄 진행중 · ⬜ 미완료
 ---
 
@@ -98,7 +98,7 @@
 
 ## 3. 인증 (PRD §5-1) — 담당: 팀원 A
 
-> 브랜치: `feat/auth`
+> 브랜치: `feat/auth` → ✅ dev 머지 완료
 
 - [x] ✅ `src/lib/supabase.js` 작성 — createClient 초기화
 - [x] ✅ `src/context/AuthContext.jsx` 작성
@@ -119,7 +119,7 @@
 
 ## 4. RAWG API 연동 (PRD §7-1) — 담당: 팀원 B
 
-> 브랜치: `feat/search`
+> 브랜치: `feat/search` → ✅ dev 머지 완료
 
 - [x] ✅ RAWG API 키 발급 후 `.env` 등록
 - [x] ✅ `src/lib/rawg.js` 작성
@@ -253,8 +253,8 @@
 
 | 팀원 | 담당 | 상태 |
 |------|------|------|
-| 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | 🔄 진행중 (Google/Discord 로그인, 로그아웃, 세션 복원 완료 / Protected Route·profiles upsert 미완료) |
-| 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ RAWG 연동 완료 / ⬜ Supabase 연동 미완료 |
+| 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | ✅ feat/auth → dev 머지 완료 / ⬜ Protected Route·profiles upsert 미완료 |
+| 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ feat/search → dev 머지 완료 / ⬜ Supabase 연동 미완료 |
 | 팀원 C | 컴포넌트/UI (components 전체, ProfilePage, LFGPage, StatsPage) | ✅ UI 완료 / ⬜ 연동 미완료 |
 
 ---
