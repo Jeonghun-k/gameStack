@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useGameDetail } from '../hooks/useGameDetail'; // ▶ [P0] RAWG API로 게임 상세 정보 fetch 완료
+import { useGameDetail } from '../hooks/useGameDetail'; 
 import GlassCard from '../components/GlassCard';
 import StatusBadge, { STATUS_META } from '../components/StatusBadge';
 import StarRating from '../components/StarRating';
@@ -10,30 +10,14 @@ import Icon from '../components/Icon';
 export default function GameDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
   
-  // ▶ [P0] RAWG API로 게임 상세 정보 fetch
   const { game, isLoading, error } = useGameDetail(id);
 
   const [rating, setRating] = useState(0);
   const [status, setStatus] = useState("backlog");
   const [review, setReview] = useState("");
-  const [comments, setComments] = useState([]); // 댓글 목록 상태
-
-  // ▶ [P1] 댓글 조회 (supabase.from('comments').select('*').eq('game_id', id))
-  useEffect(() => {
-    const fetchComments = async () => {
-      const { data, error } = await supabase
-        .from('comments')
-        .select('*')
-        .eq('game_id', Number(id))
-        .order('created_at', { ascending: false });
-      
-      if (!error && data) setComments(data);
-    };
-    fetchComments();
-  }, [id]);
-
-  // ▶ [P0] 별점 저장 (supabase.from('ratings').upsert)
+  const [comments, setComments] = useState([]);
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -53,12 +37,15 @@ export default function GameDetailPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return; 
 
+      // [수정] 로그인한 유저 정보를 상태에 저장하여 UI에서 비교할 수 있게 합니다.
+      setCurrentUser(user);
+
       const { data: ratingData } = await supabase
         .from('ratings')
         .select('score')
         .eq('user_id', user.id)
         .eq('game_id', Number(id))
-        .single();
+        .maybeSingle(); 
       
       if (ratingData) setRating(ratingData.score);
 
@@ -67,7 +54,7 @@ export default function GameDetailPage() {
         .select('status')
         .eq('user_id', user.id)
         .eq('rawg_id', Number(id))
-        .single();
+        .maybeSingle(); 
 
       if (gameData) setStatus(gameData.status);
     };
@@ -75,7 +62,26 @@ export default function GameDetailPage() {
     fetchUserPreferences();
   }, [id]);
 
-  // ▶ [P1] 상태 변경 저장 (Supabase UPDATE)
+  const handleRatingChange = async (newScore) => {
+    setRating(newScore);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return alert("로그인이 필요합니다.");
+
+      const { error } = await supabase
+        .from('ratings')
+        .upsert({ 
+          user_id: user.id, 
+          game_id: Number(id), 
+          score: newScore 
+        }, { onConflict: 'user_id, game_id' });
+
+      if (error) throw error;
+    } catch (err) {
+      console.error("별점 저장 에러:", err.message);
+    }
+  };
+
   const handleStatusChange = async (newStatus) => {
     setStatus(newStatus);
     const { data: { user } } = await supabase.auth.getUser();
@@ -88,7 +94,38 @@ export default function GameDetailPage() {
       .eq('rawg_id', Number(id));
   };
 
-  // ▶ [P1] 리뷰 저장 기능 연결 & 댓글 작성 (supabase.from('comments').insert)
+  // ▶ 라이브러리에서 제거 기능 추가
+  const handleRemoveFromLibrary = async () => {
+  const confirmDelete = window.confirm("이 게임을 라이브러리에서 삭제하시겠습니까?");
+  if (!confirmDelete) return;
+
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return alert("로그인이 필요합니다.");
+
+    // [수정] 삭제 요청과 함께 에러 상세 내용을 받습니다.
+    const { error } = await supabase
+      .from('games')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('rawg_id', Number(id));
+
+    if (error) {
+      // 외래 키 에러(23503)인지 확인하기 위함
+      console.error("삭제 실패 상세:", error);
+      if (error.code === '23503') {
+        return alert("이 게임에 작성된 리뷰나 별점이 있어 지울 수 없습니다. 리뷰를 먼저 지우거나 DB 설정을 변경해야 합니다.");
+      }
+      throw error;
+    }
+
+    alert("라이브러리에서 제거되었습니다.");
+    navigate('/library');
+  } catch (err) {
+    alert("삭제 실패: " + err.message);
+  }
+};
+
   const handleSaveReview = async () => {
     if (!review.trim()) return;
     const { data: { user } } = await supabase.auth.getUser();
@@ -101,20 +138,25 @@ export default function GameDetailPage() {
       .single();
 
     if (!error && data) {
-      setComments([data, ...comments]); // UI 즉시 업데이트
-      setReview(""); // 입력창 초기화
+      setComments([data, ...comments]); 
+      setReview(""); 
     }
   };
 
-  // ▶ [P1] 댓글 삭제 (supabase.from('comments').delete().eq('id', commentId))
+  // [수정] 삭제 권한 2차 검증 로직 추가
   const handleDeleteComment = async (commentId) => {
+    if (!currentUser) return;
+
     const { error } = await supabase
       .from('comments')
       .delete()
-      .eq('id', commentId);
+      .eq('id', commentId)
+      .eq('user_id', currentUser.id); // DB에서도 본인 글만 지워지도록 강제
 
     if (!error) {
       setComments(comments.filter(c => c.id !== commentId));
+    } else {
+      alert("삭제할 수 없습니다.");
     }
   };
 
@@ -130,7 +172,6 @@ export default function GameDetailPage() {
         <Icon name="chevronLeft" size={15} /> Back to Library
       </button>
 
-      {/* 게임 헤더 영역 (커버, 제목, 메타스코어, 출시일 등) */}
       <div style={{ position: "relative", borderRadius: 20, overflow: "hidden", marginBottom: 24, height: 260 }}>
         <img src={game.cover} alt={game.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg,rgba(8,9,15,0.95) 30%,rgba(8,9,15,0.4))" }} />
@@ -153,7 +194,6 @@ export default function GameDetailPage() {
         </div>
       </div>
 
-      {/* 상태 변경 및 별점 폼 */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 24 }}>
         <GlassCard style={{ padding: "18px 20px" }}>
           <div style={{ fontSize: 12, color: "var(--text3)", fontWeight: 600, marginBottom: 10 }}>STATUS</div>
@@ -181,7 +221,19 @@ export default function GameDetailPage() {
         </GlassCard>
       </div>
 
-      {/* 리뷰 작성 폼 */}
+      <div style={{ marginBottom: 24, textAlign: "right" }}>
+        <button 
+          onClick={handleRemoveFromLibrary}
+          style={{ 
+            background: "transparent", color: "rgba(239, 68, 68, 0.7)", 
+            border: "1px solid rgba(239, 68, 68, 0.3)", padding: "8px 16px", 
+            borderRadius: "8px", fontSize: "12px", fontWeight: "600", cursor: "pointer"
+          }}
+        >
+          Remove from Library
+        </button>
+      </div>
+
       <GlassCard style={{ padding: "20px", marginBottom: 24 }}>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10, color: "var(--text2)" }}>Write a Review</div>
         <textarea
@@ -200,14 +252,21 @@ export default function GameDetailPage() {
         </div>
       </GlassCard>
 
-      {/* 댓글 목록 렌더링 영역 (추가된 UI) */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {comments.map((c) => (
           <GlassCard key={c.id} style={{ padding: "16px" }}>
             <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8, whiteSpace: "pre-wrap" }}>{c.text}</div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11, color: "var(--text3)" }}>
               <span>{new Date(c.created_at).toLocaleDateString()}</span>
-              <button onClick={() => handleDeleteComment(c.id)} style={{ color: "#ef4444" }}>삭제</button>
+              {/* [수정] 현재 로그인한 유저 ID와 댓글 작성자 ID가 동일할 때만 삭제 버튼 렌더링 */}
+              {currentUser && currentUser.id === c.user_id && (
+                <button 
+                  onClick={() => handleDeleteComment(c.id)} 
+                  style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontSize: "11px" }}
+                >
+                  삭제
+                </button>
+              )}
             </div>
           </GlassCard>
         ))}
