@@ -136,7 +136,7 @@
 
 ## 5. 게임 라이브러리 (PRD §5-2) — 담당: 팀원 B
 
-> 브랜치: `feat/library`
+> 브랜치: `feat/library` → ✅ dev 머지 완료
 
 ### UI (완료)
 - [x] ✅ **[P0]** 탭 필터 (All / Playing / Completed / Backlog / Dropped)
@@ -254,7 +254,7 @@
 | 팀원 | 담당 | 상태 |
 |------|------|------|
 | 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | ✅ feat/auth → dev 머지 완료 / ⬜ Protected Route·profiles upsert 미완료 |
-| 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ feat/search → dev 머지 완료 / ✅ 라이브러리 Supabase 연동 완료 |
+| 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ feat/search → dev 머지 완료 / ✅ feat/library → dev 머지 완료 |
 | 팀원 C | 컴포넌트/UI (components 전체, ProfilePage, LFGPage, StatsPage) | ✅ UI 완료 / ⬜ 연동 미완료 |
 
 ---
