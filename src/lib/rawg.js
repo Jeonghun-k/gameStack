@@ -7,12 +7,14 @@ export const searchGames = async (query) => {
   const data = await response.json();
   
   return data.results.map(game => ({
-    id: game.id,                                      //
-    title: game.name,                                 // UI의 {game.title}과 매칭[cite: 6, 7]
-    cover: game.background_image,                    // UI의 {game.cover}와 매칭[cite: 6, 7]
-    metacritic: game.metacritic || 0,                 //[cite: 6, 7]
-    genre: game.genres.map(g => g.name),             // UI의 {game.genre}와 매칭
-    year: game.released ? new Date(game.released).getFullYear() : "TBD" // 검색 모달용
+    id: game.id,
+    rawg_id: game.id,
+    title: game.name,
+    cover: game.background_image,
+    metacritic: game.metacritic || 0,
+    genre: game.genres.map(g => g.name),
+    genres: game.genres.map(g => g.name),
+    year: game.released ? new Date(game.released).getFullYear() : "TBD"
   }));
 };
 

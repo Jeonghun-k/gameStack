@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'; // [수정] useCallback 삭제 (훅이 대신 처리)
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GlassCard from '../components/GlassCard';
 import GameCard from '../components/GameCard';
@@ -6,22 +6,20 @@ import StarRating from '../components/StarRating';
 import StatusBadge from '../components/StatusBadge';
 import TopBar from '../components/TopBar';
 import Icon from '../components/Icon';
-import mockData from '../data/mockData';
-// [추가] 직접 만든 useSearch 훅 임포트
-import { useSearch } from '../hooks/useSearch'; 
+import { useSearch } from '../hooks/useSearch';
+import { useLibrary } from '../hooks/useLibrary';
 
 export default function LibraryPage() {
   const navigate = useNavigate();
-  const [filter, setFilter]               = useState("all");
-  const [search, setSearch]               = useState("");
-  const [view, setView]                   = useState("grid");
-  const [sortBy, setSortBy]               = useState("title");
-  const [library, setLibrary]             = useState(mockData.library);
-  const [addOpen, setAddOpen]             = useState(false);
-  
-  // [수정] 기존 searchResults 상태 삭제 -> 훅에서 직접 가져옴
-  const [searchQuery, setSearchQuery]     = useState("");
-  const { results: searchResults, isLoading } = useSearch(searchQuery); 
+  const [filter, setFilter]           = useState("all");
+  const [search, setSearch]           = useState("");
+  const [view, setView]               = useState("grid");
+  const [sortBy, setSortBy]           = useState("title");
+  const [addOpen, setAddOpen]         = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { library, loading, addGameToLibrary, updateGameStatus, deleteGame } = useLibrary();
+  const { results: searchResults, isLoading } = useSearch(searchQuery);
 
   const tabs = [
     { id: "all",       label: "All",       count: library.length },
@@ -44,21 +42,20 @@ export default function LibraryPage() {
 
   // [수정] 가짜 데이터를 찾는 handleSearch 함수 삭제 (setSearchQuery만 유지)
 
-  const addGame = (game) => {
-    // RAWG 데이터 규격(game.genre)에 맞춰 기본값 설정
-    setLibrary((prev) => [{ 
-      ...game, 
-      status: "backlog", 
-      rating: 0, 
-      hours: 0, 
-      platform: "Steam" 
-    }, ...prev]);
-    setAddOpen(false);
-    setSearchQuery("");
+  const addGame = async (game) => {
+    const ok = await addGameToLibrary(game);
+    if (ok) {
+      setAddOpen(false);
+      setSearchQuery("");
+    }
   };
 
   return (
     <div>
+      {loading && (
+        <div style={{ textAlign: "center", padding: 40, color: "#a855f7" }}>라이브러리 불러오는 중...</div>
+      )}
+
       <TopBar
         title="My Library"
         subtitle={`${library.length} games tracked`}
@@ -80,7 +77,7 @@ export default function LibraryPage() {
       {view === "grid" ? (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(140px,1fr))", gap: 14 }}>
           {filtered.map((g) => (
-            <GameCard key={g.id} game={g} onOpen={(game) => navigate(`/game/${game.id}`)} />
+            <GameCard key={g.id} game={g} onOpen={(game) => navigate(`/game/${game.rawg_id}`)} />
           ))}
         </div>
       ) : (
@@ -89,7 +86,7 @@ export default function LibraryPage() {
             <GlassCard
               key={g.id}
               style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 14 }}
-              onClick={() => navigate(`/game/${g.id}`)}
+              onClick={() => navigate(`/game/${g.rawg_id}`)}
             >
               <img src={g.cover} alt={g.title} style={{ width: 48, height: 64, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -101,7 +98,12 @@ export default function LibraryPage() {
                   ))}
                 </div>
               </div>
-              {/* ... (우측 별점 등 생략) ... */}
+              <button
+                onClick={(e) => { e.stopPropagation(); deleteGame(g.id); }}
+                style={{ padding: "4px 8px", borderRadius: 6, background: "rgba(239,68,68,0.1)", color: "#ef4444", fontSize: 12, flexShrink: 0 }}
+              >
+                삭제
+              </button>
             </GlassCard>
           ))}
         </div>
