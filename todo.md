@@ -136,7 +136,7 @@
 
 ## 5. 게임 라이브러리 (PRD §5-2) — 담당: 팀원 B
 
-> 브랜치: `feat/library`
+> 브랜치: `feat/library` → ✅ dev 머지 완료
 
 ### UI (완료)
 - [x] ✅ **[P0]** 탭 필터 (All / Playing / Completed / Backlog / Dropped)
@@ -145,13 +145,13 @@
 - [x] ✅ 게임 추가 모달 UI
 - [x] ✅ 게임 카드 클릭 → 상세 페이지 이동
 
-### Supabase 연동 (미완료)
-- [ ] ⬜ `src/hooks/useLibrary.js` 작성
-- [ ] ⬜ **[P0]** 라이브러리 목록 조회 — `supabase.from('games').select('*').eq('user_id', user.id)`
-- [ ] ⬜ **[P0]** 게임 추가 — `supabase.from('games').insert({...})`
-- [ ] ⬜ **[P0]** 상태 변경 — `supabase.from('games').update({ status }).eq('id', gameId)`
-- [ ] ⬜ **[P0]** 게임 삭제 버튼 UI 추가 + `supabase.from('games').delete().eq('id', gameId)`
-- [ ] ⬜ mockData → Supabase 실데이터로 교체
+### Supabase 연동 (완료)
+- [x] ✅ `src/hooks/useLibrary.js` 작성
+- [x] ✅ **[P0]** 라이브러리 목록 조회 — `supabase.from('games').select('*').eq('user_id', user.id)`
+- [x] ✅ **[P0]** 게임 추가 — `supabase.from('games').insert({...})`
+- [x] ✅ **[P0]** 상태 변경 — `supabase.from('games').update({ status }).eq('id', gameId)`
+- [x] ✅ **[P0]** 게임 삭제 버튼 UI 추가 + `supabase.from('games').delete().eq('id', gameId)`
+- [x] ✅ mockData → Supabase 실데이터로 교체
 
 ---
 
@@ -180,27 +180,30 @@
 
 ## 7. 프로필 (PRD §5-4) — 담당: 팀원 C
 
+> 브랜치: `feat/profile` → ✅ dev 머지 완료
+
 ### UI (완료)
 - [x] ✅ **[P1]** 프로필 헤더 (아바타, 닉네임, 바이오, 플랫폼, 가입일)
 - [x] ✅ **[P1]** 통계 카드 (Total Games, Completed, Hours, Backlog)
 - [x] ✅ **[P1]** Top Rated Games 섹션 (★5 완료작)
 - [x] ✅ **[P1]** 공개 프로필 링크 표시 UI
 
-### Supabase 연동
+### Supabase 연동 (완료)
 - [x] ✅ **[P1]** 실제 로그인 유저 데이터로 교체 (mockData 제거)
 - [x] ✅ **[P2]** 닉네임 변경 — Edit 버튼 기능 연결 + `supabase.from('profiles').upsert({ nickname })`
-- [x] ✅ 공유하기 버튼 — 클립보드 복사 기능 연결
 - [ ] ⬜ **[P2]** 공개 프로필 링크 — URL 라우팅 `/[userId]` 구현 (react-router-dom)
 
 ---
 
 ## 8. 통계 (PRD §5-5) — 담당: 팀원 C
 
+> 브랜치: `feat/profile` → ✅ dev 머지 완료
+
 ### UI (완료)
 - [x] ✅ **[P1]** 장르 분포 바 차트
 - [x] ✅ **[P1]** 월별 플레이 시간 바 차트
 - [x] ✅ **[P1]** 상태별 현황 (Playing/Completed/Backlog/Dropped 비율)
-- [x] ✅ 상단 통계 카드 4종 (Total Hours, Completion Rate, Avg per Game, Backlog Debt)
+- [x] ✅ 상단 통계 카드 4종 (Total Games, Completion Rate, Playing Now, Backlog Debt)
 
 ### Supabase 연동 (완료)
 - [x] ✅ **[P1]** 실제 라이브러리 데이터 기반 장르 통계 집계
@@ -255,8 +258,8 @@
 | 팀원 | 담당 | 상태 |
 |------|------|------|
 | 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | ✅ feat/auth → dev 머지 완료 / ⬜ Protected Route·profiles upsert 미완료 |
-| 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ feat/search → dev 머지 완료 / ⬜ Supabase 연동 미완료 |
-| 팀원 C | 컴포넌트/UI (components 전체, ProfilePage, LFGPage, StatsPage) | ✅ UI 완료 / ⬜ 연동 미완료 |
+| 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ feat/search → dev 머지 완료 / ✅ feat/library → dev 머지 완료 |
+| 팀원 C | 컴포넌트/UI (components 전체, ProfilePage, LFGPage, StatsPage) | ✅ UI 완료 / ✅ feat/profile → dev 머지 완료 / ⬜ `/[userId]` 라우팅 미완료 |
 
 ---
 
