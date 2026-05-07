@@ -186,9 +186,10 @@
 - [x] ✅ **[P1]** Top Rated Games 섹션 (★5 완료작)
 - [x] ✅ **[P1]** 공개 프로필 링크 표시 UI
 
-### Supabase 연동 (미완료)
-- [ ] ⬜ **[P1]** 실제 로그인 유저 데이터로 교체 (mockData 제거)
-- [ ] ⬜ **[P2]** 닉네임 변경 — Edit 버튼 기능 연결 + `supabase.from('profiles').update({ nickname })`
+### Supabase 연동
+- [x] ✅ **[P1]** 실제 로그인 유저 데이터로 교체 (mockData 제거)
+- [x] ✅ **[P2]** 닉네임 변경 — Edit 버튼 기능 연결 + `supabase.from('profiles').upsert({ nickname })`
+- [x] ✅ 공유하기 버튼 — 클립보드 복사 기능 연결
 - [ ] ⬜ **[P2]** 공개 프로필 링크 — URL 라우팅 `/[userId]` 구현 (react-router-dom)
 
 ---
@@ -201,10 +202,10 @@
 - [x] ✅ **[P1]** 상태별 현황 (Playing/Completed/Backlog/Dropped 비율)
 - [x] ✅ 상단 통계 카드 4종 (Total Hours, Completion Rate, Avg per Game, Backlog Debt)
 
-### Supabase 연동 (미완료)
-- [ ] ⬜ **[P1]** 실제 라이브러리 데이터 기반 장르 통계 집계
-- [ ] ⬜ **[P1]** 실제 라이브러리 데이터 기반 상태별 비율 계산
-- [ ] ⬜ **[P2]** 월별 게임 추가 수 집계 (Supabase `created_at` 기반)
+### Supabase 연동 (완료)
+- [x] ✅ **[P1]** 실제 라이브러리 데이터 기반 장르 통계 집계
+- [x] ✅ **[P1]** 실제 라이브러리 데이터 기반 상태별 비율 계산
+- [x] ✅ **[P2]** 월별 게임 추가 수 집계 (Supabase `created_at` 기반)
 
 ---
 
