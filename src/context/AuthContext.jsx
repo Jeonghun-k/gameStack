@@ -24,8 +24,16 @@ export const AuthProvider = ({ children }) => {
 
     // 로그인/로그아웃 이벤트를 실시간으로 감지하여 user 상태를 자동 업데이트
     // 예: 다른 탭에서 로그아웃하면 이 탭도 자동으로 반영됨
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
+      if (event === 'SIGNED_IN' && session?.user) {
+        const u = session.user;
+        await supabase.from('profiles').upsert({
+          id: u.id,
+          email: u.email,
+          nickname: u.user_metadata?.full_name ?? u.user_metadata?.name ?? u.email?.split('@')[0],
+        }, { onConflict: 'id' });
+      }
     });
 
     // 컴포넌트 언마운트 시 이벤트 리스너 정리 (메모리 누수 방지)

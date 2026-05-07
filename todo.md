@@ -111,9 +111,9 @@
 - [x] ✅ **[P0]** 로그아웃 버튼 연결 (Sidebar 유저 팝업 메뉴)
 - [x] ✅ **[P0]** 새로고침 후 세션 복원 (AuthContext에서 처리)
 - [x] ✅ Sidebar 유저 정보 실데이터 표시 (mockData 제거)
-- [ ] ⬜ **[P1]** 비로그인 접근 제한 — Library, Profile, LFG, Stats 페이지 보호
+- [x] ✅ **[P1]** 비로그인 접근 제한 — Library, Profile, LFG, Stats 페이지 보호
   - 미로그인 시 LandingPage로 리다이렉트
-- [ ] ⬜ 로그인 후 `profiles` 테이블에 유저 정보 자동 upsert
+- [x] ✅ 로그인 후 `profiles` 테이블에 유저 정보 자동 upsert
 
 ---
 

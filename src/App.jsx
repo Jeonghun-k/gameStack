@@ -9,6 +9,11 @@ import StatsPage from './pages/StatsPage';
 import GameDetailPage from './pages/GameDetailPage';
 import { useAuth } from './context/AuthContext';
 
+function ProtectedRoute({ children }) {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/" replace />;
+}
+
 function Layout() {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
@@ -32,9 +37,8 @@ export default function App() {
 
   return (
     <Routes>
-      {/* 로그인된 상태로 루트 접근 시 대시보드로 이동 */}
       <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
-      <Route path="/*" element={<Layout />} />
+      <Route path="/*" element={<ProtectedRoute><Layout /></ProtectedRoute>} />
     </Routes>
   );
 }
