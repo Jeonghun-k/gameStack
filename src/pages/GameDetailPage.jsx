@@ -5,19 +5,28 @@ import StatusBadge from '../components/StatusBadge';
 import StarRating from '../components/StarRating';
 import Icon from '../components/Icon';
 import { STATUS_META } from '../components/StatusBadge';
-import mockData from '../data/mockData';
+// [추가] 가짜 데이터(mockData)를 지우고, 본인이 만든 훅을 가져옵니다.
+import { useGameDetail } from '../hooks/useGameDetail';
 
 export default function GameDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const game = mockData.library.find((g) => g.id === Number(id));
+  
+  // [수정] 실제 RAWG API에서 게임 상세 정보를 실시간으로 가져옵니다!
+  const { game, isLoading, error } = useGameDetail(id);
 
-  const [rating, setRating] = useState(game?.rating || 0);
-  const [status, setStatus] = useState(game?.status || "backlog");
+  // 별점, 상태, 리뷰는 유저 개인 데이터이므로 일단 기본값으로 둡니다. (추후 DB 연결)
+  const [rating, setRating] = useState(0);
+  const [status, setStatus] = useState("backlog");
   const [review, setReview] = useState("");
 
-  if (!game) {
-    return <div style={{ padding: 40, color: "var(--text3)" }}>게임을 찾을 수 없습니다.</div>;
+  // [추가] 네트워크 통신 중일 때 보여줄 로딩 화면
+  if (isLoading) {
+    return <div style={{ padding: 40, color: "var(--text3)", textAlign: "center" }}>데이터를 불러오는 중...</div>;
+  }
+
+  if (error || !game) {
+    return <div style={{ padding: 40, color: "var(--text3)", textAlign: "center" }}>게임을 찾을 수 없습니다.</div>;
   }
 
   return (
@@ -34,7 +43,7 @@ export default function GameDetailPage() {
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg,rgba(8,9,15,0.95) 30%,rgba(8,9,15,0.4))" }} />
         <div style={{ position: "absolute", inset: 0, padding: "32px" }}>
           <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-            {game.genre.map((g) => (
+            {game.genre && game.genre.map((g) => (
               <span key={g} style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 6, padding: "3px 10px", fontSize: 12, color: "#c084fc" }}>{g}</span>
             ))}
           </div>
@@ -46,11 +55,21 @@ export default function GameDetailPage() {
                 MC {game.metacritic}
               </div>
             )}
-            {game.hours > 0 && <span style={{ fontSize: 13, color: "var(--text2)" }}>⏱ {game.hours}h played</span>}
-            <span style={{ fontSize: 13, color: "var(--text2)" }}>{game.platform}</span>
+            {/* 출시일 표시 (RAWG 데이터 활용) */}
+            {game.released && <span style={{ fontSize: 13, color: "var(--text2)" }}>📅 {game.released}</span>}
           </div>
         </div>
       </div>
+
+      {/* [추가] RAWG API에서 받아온 게임 설명(description) 영역 */}
+      {game.description && (
+        <GlassCard style={{ padding: "20px", marginBottom: 24 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10, color: "var(--text2)" }}>About this game</div>
+          <p style={{ fontSize: 13, color: "var(--text3)", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+            {game.description}
+          </p>
+        </GlassCard>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 24 }}>
         <GlassCard style={{ padding: "18px 20px" }}>
