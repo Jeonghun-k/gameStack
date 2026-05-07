@@ -145,13 +145,13 @@
 - [x] ✅ 게임 추가 모달 UI
 - [x] ✅ 게임 카드 클릭 → 상세 페이지 이동
 
-### Supabase 연동 (미완료)
-- [ ] ⬜ `src/hooks/useLibrary.js` 작성
-- [ ] ⬜ **[P0]** 라이브러리 목록 조회 — `supabase.from('games').select('*').eq('user_id', user.id)`
-- [ ] ⬜ **[P0]** 게임 추가 — `supabase.from('games').insert({...})`
-- [ ] ⬜ **[P0]** 상태 변경 — `supabase.from('games').update({ status }).eq('id', gameId)`
-- [ ] ⬜ **[P0]** 게임 삭제 버튼 UI 추가 + `supabase.from('games').delete().eq('id', gameId)`
-- [ ] ⬜ mockData → Supabase 실데이터로 교체
+### Supabase 연동 (완료)
+- [x] ✅ `src/hooks/useLibrary.js` 작성
+- [x] ✅ **[P0]** 라이브러리 목록 조회 — `supabase.from('games').select('*').eq('user_id', user.id)`
+- [x] ✅ **[P0]** 게임 추가 — `supabase.from('games').insert({...})`
+- [x] ✅ **[P0]** 상태 변경 — `supabase.from('games').update({ status }).eq('id', gameId)`
+- [x] ✅ **[P0]** 게임 삭제 버튼 UI 추가 + `supabase.from('games').delete().eq('id', gameId)`
+- [x] ✅ mockData → Supabase 실데이터로 교체
 
 ---
 
@@ -255,7 +255,7 @@
 | 팀원 | 담당 | 상태 |
 |------|------|------|
 | 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | ✅ feat/auth → dev 머지 완료 / ⬜ Protected Route·profiles upsert 미완료 |
-| 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ feat/search → dev 머지 완료 / ⬜ Supabase 연동 미완료 |
+| 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ feat/search → dev 머지 완료 / ✅ 라이브러리 Supabase 연동 완료 |
 | 팀원 C | 컴포넌트/UI (components 전체, ProfilePage, LFGPage, StatsPage) | ✅ UI 완료 / ⬜ 연동 미완료 |
 
 ---

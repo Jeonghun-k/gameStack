@@ -57,30 +57,30 @@ export const useLibrary = () => {
       return false;
     }
 
-    const newGame = {
-      id: Date.now(),        // 비로그인 임시 ID (로그인 시 Supabase가 uuid 자동 생성)
+    const localGame = {
+      id: Date.now(),
       rawg_id: game.rawg_id,
       title: game.title,
       cover: game.cover,
-      genre: game.genres || [],
-      genres: game.genres || [],
+      genre: game.genres || game.genre || [],
+      genres: game.genres || game.genre || [],
       metacritic: game.metacritic,
-      status: 'backlog',     // 새로 추가된 게임은 기본적으로 backlog 상태
+      status: 'backlog',
       hours: 0,
       rating: 0,
       platform: 'Steam'
     };
 
     if (!user) {
-      // 비로그인 시 로컬 상태에만 추가 (새로고침하면 사라짐)
-      setLibrary(prev => [newGame, ...prev]);
+      setLibrary(prev => [localGame, ...prev]);
       return true;
     }
 
-    // 로그인 시 Supabase games 테이블에 INSERT
+    // Supabase INSERT — id 제외(uuid 자동 생성), user_id 포함(RLS 필수)
+    const { rawg_id, title, cover, genres, metacritic, status } = localGame;
     const { data, error } = await supabase
       .from('games')
-      .insert([newGame])
+      .insert([{ user_id: user.id, rawg_id, title, cover, genres, metacritic, status }])
       .select()
       .single();
 
