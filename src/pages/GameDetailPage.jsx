@@ -34,15 +34,46 @@ export default function GameDetailPage() {
   }, [id]);
 
   // ▶ [P0] 별점 저장 (supabase.from('ratings').upsert)
-  const handleRatingChange = async (newScore) => {
-    setRating(newScore);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return alert("로그인이 필요합니다.");
 
-    await supabase
-      .from('ratings')
-      .upsert({ user_id: user.id, game_id: Number(id), score: newScore }, { onConflict: 'user_id, game_id' });
-  };
+  useEffect(() => {
+    const fetchComments = async () => {
+      const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('game_id', Number(id))
+        .order('created_at', { ascending: false });
+      
+      if (!error && data) setComments(data);
+    };
+    fetchComments();
+  }, [id]);
+  
+  useEffect(() => {
+    const fetchUserPreferences = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return; 
+
+      const { data: ratingData } = await supabase
+        .from('ratings')
+        .select('score')
+        .eq('user_id', user.id)
+        .eq('game_id', Number(id))
+        .single();
+      
+      if (ratingData) setRating(ratingData.score);
+
+      const { data: gameData } = await supabase
+        .from('games')
+        .select('status')
+        .eq('user_id', user.id)
+        .eq('rawg_id', Number(id))
+        .single();
+
+      if (gameData) setStatus(gameData.status);
+    };
+
+    fetchUserPreferences();
+  }, [id]);
 
   // ▶ [P1] 상태 변경 저장 (Supabase UPDATE)
   const handleStatusChange = async (newStatus) => {
