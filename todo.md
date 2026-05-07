@@ -103,11 +103,10 @@
 - [x] ✅ `src/lib/supabase.js` 작성 — createClient 초기화
 - [x] ✅ `src/context/AuthContext.jsx` 작성
   - [x] ✅ Google OAuth 로그인 함수
-  - [x] ✅ Discord OAuth 로그인 함수
   - [x] ✅ 로그아웃 함수
   - [x] ✅ 세션 상태 구독 (`onAuthStateChange`)
   - [x] ✅ 전역 `user` 상태 제공
-- [x] ✅ **[P0]** Google / Discord 소셜 로그인 버튼 연결 (LandingPage)
+- [x] ✅ **[P0]** Google 소셜 로그인 버튼 연결 (LandingPage)
 - [x] ✅ **[P0]** 로그인 후 `/dashboard` 자동 리다이렉트
 - [x] ✅ **[P0]** 로그아웃 버튼 연결 (Sidebar 유저 팝업 메뉴)
 - [x] ✅ **[P0]** 새로고침 후 세션 복원 (AuthContext에서 처리)

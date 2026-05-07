@@ -32,14 +32,6 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Discord OAuth 로그인 — 완료 후 /dashboard로 리다이렉트
-  const signInWithDiscord = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'discord',
-      options: { redirectTo: `${window.location.origin}/dashboard` },
-    });
-  };
-
   // Google OAuth 로그인 — 완료 후 /dashboard로 리다이렉트
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
@@ -70,7 +62,7 @@ export const AuthProvider = ({ children }) => {
   return (
     // value로 내보내는 것들을 useAuth()로 어디서든 꺼내 쓸 수 있음
     // loading이 true인 동안은 children(앱 전체)을 렌더링하지 않아 깜빡임 방지
-    <AuthContext.Provider value={{ user, signInWithDiscord, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut, loading }}>
+    <AuthContext.Provider value={{ user, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );

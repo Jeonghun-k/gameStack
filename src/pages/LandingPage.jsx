@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 export default function LandingPage() {
   const navigate = useNavigate();
   const [hov, setHov] = useState(false);
-  const { signInWithGoogle, signInWithDiscord } = useAuth();
+  const { signInWithGoogle } = useAuth();
 
   return (
     <div style={{
@@ -57,12 +57,6 @@ export default function LandingPage() {
             }}
           >
             Google로 시작하기 →
-          </button>
-          <button
-            onClick={signInWithDiscord}
-            style={{ background: "#5865F2", border: "1px solid #4752C4", color: "#fff", padding: "13px 28px", borderRadius: 12, fontSize: 15, fontWeight: 600 }}
-          >
-            Discord로 시작하기
           </button>
         </div>
       </div>
