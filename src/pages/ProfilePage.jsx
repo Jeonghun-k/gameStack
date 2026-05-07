@@ -45,6 +45,7 @@ export default function ProfilePage() {
   const saveNickname = async () => {
     setSaving(true);
     await supabase.from('profiles').upsert({ id: user.id, nickname });
+    await supabase.auth.updateUser({ data: { full_name: nickname } });
     setSaving(false);
     setEditing(false);
   };
@@ -55,17 +56,12 @@ export default function ProfilePage() {
         title="My Profile"
         subtitle={`gamestack.com/${userId.slice(0, 8)}`}
         actions={
-          <div style={{ display: "flex", gap: 8 }}>
-            <button style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.2)", color: "#a855f7", padding: "7px 14px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}>
-              <Icon name="share" size={14} /> Share
-            </button>
-            <button
-              onClick={() => setEditing((v) => !v)}
-              style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "var(--text2)", padding: "7px 14px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
-            >
-              <Icon name="edit" size={14} /> Edit
-            </button>
-          </div>
+          <button
+            onClick={() => setEditing((v) => !v)}
+            style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "var(--text2)", padding: "7px 14px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
+          >
+            <Icon name="edit" size={14} /> Edit
+          </button>
         }
       />
 
