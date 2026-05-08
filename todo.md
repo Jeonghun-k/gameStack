@@ -191,7 +191,7 @@
 ### Supabase 연동 (완료)
 - [x] ✅ **[P1]** 실제 로그인 유저 데이터로 교체 (mockData 제거)
 - [x] ✅ **[P2]** 닉네임 변경 — Edit 버튼 기능 연결 + `supabase.from('profiles').upsert({ nickname })`
-- [ ] ⬜ **[P2]** 공개 프로필 링크 — URL 라우팅 `/[userId]` 구현 (react-router-dom)
+- [x] ✅ **[P2]** 공개 프로필 링크 — URL 라우팅 `/[userId]` 구현 (react-router-dom) → `feat/user-search`
 
 ---
 
