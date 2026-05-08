@@ -36,7 +36,7 @@ export default function LandingPage() {
         </h1>
 
         <p style={{ fontSize: "clamp(15px,2vw,18px)", color: "var(--text2)", lineHeight: 1.7, maxWidth: 520, margin: "0 auto 40px" }}>
-          Steam, PlayStation, Xbox — 모든 플랫폼의 게임 이력을 한 곳에. 나만의 게이머 포트폴리오를 만들고 공유하세요.
+          즐긴 게임을 한 곳에 모아 관리하고, 나만의 게이머 프로필을 만들어 공유하세요.
         </p>
 
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
@@ -64,8 +64,8 @@ export default function LandingPage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, maxWidth: 860, width: "100%", marginTop: 72, position: "relative", zIndex: 1 }}>
         {[
           { icon: "library", title: "게임 라이브러리", desc: "Backlog·Playing·Completed·Dropped 상태로 체계적 관리", color: "#7C3AED" },
-          { icon: "stats",   title: "플레이 통계",    desc: "장르 분포, 총 플레이 시간, 월별 기록을 시각화",          color: "#06b6d4" },
-          { icon: "lfg",     title: "LFG Team-up",   desc: "실시간으로 같이 게임할 팀원을 모집하세요",              color: "#22c55e" },
+          { icon: "stats",   title: "플레이 통계",    desc: "장르 분포와 상태별 현황을 한눈에 시각화",               color: "#06b6d4" },
+          { icon: "lfg",     title: "유저 검색",      desc: "닉네임으로 다른 게이머를 찾고 공개 프로필을 확인하세요", color: "#22c55e" },
         ].map((f) => (
           <GlassCard key={f.title} style={{ padding: "24px", textAlign: "center" }}>
             <div style={{ width: 48, height: 48, borderRadius: 14, background: `${f.color}18`, border: `1px solid ${f.color}30`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
@@ -78,7 +78,7 @@ export default function LandingPage() {
       </div>
 
       <div style={{ display: "flex", gap: 32, marginTop: 48, color: "var(--text3)", fontSize: 13, position: "relative", zIndex: 1 }}>
-        {[["2,400+", "Active Gamers"], ["15,000+", "Games Tracked"], ["98%", "Uptime"]].map(([v, l]) => (
+        {[["500,000+", "RAWG Games DB"], ["4가지", "상태 관리"], ["Google", "간편 로그인"]].map(([v, l]) => (
           <div key={l} style={{ textAlign: "center" }}>
             <div style={{ fontFamily: "var(--font2)", fontWeight: 700, fontSize: 22, color: "var(--text)", letterSpacing: "-0.03em" }}>{v}</div>
             <div>{l}</div>
