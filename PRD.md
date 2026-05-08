@@ -20,13 +20,13 @@
 - 플랫폼마다 분산된 게임 기록
 - 내가 어떤 게임을 얼마나 했는지 한눈에 파악 불가
 - 게임 취향을 친구나 커뮤니티와 쉽게 공유할 방법 없음
-- 같이 게임할 팀원을 찾는 과정이 비효율적
+- 비슷한 취향의 다른 게이머를 발견하고 연결할 수단이 없음
 
 ### 1-3. 목표
 
 - 게이머가 자신의 게임 라이브러리를 한 곳에서 관리할 수 있도록 한다
 - 나만의 고유 프로필 링크로 게임 이력을 공유할 수 있도록 한다
-- 같이 게임할 팀원을 실시간으로 모집할 수 있도록 한다
+- 닉네임으로 다른 유저를 검색하고 공개 프로필을 볼 수 있도록 한다
 
 ### 1-4. 타겟 사용자
 
@@ -197,13 +197,13 @@ auth.users (Supabase 자동 관리)
 | 상태별 현황 | Playing / Completed / Backlog / Dropped 비율 | P1 |
 | 월별 플레이 기록 | 월별 추가 게임 수 시각화 | P2 |
 
-### 5-6. LFG — 팀원 모집 (Looking for Group)
+### 5-6. 유저 검색 (User Search)
 
 | 기능 | 설명 | 우선순위 |
 |------|------|----------|
-| 모집 게시글 작성 | 게임명, 타입, 설명 입력 | P2 |
-| 게시글 목록 조회 | 타입 필터 (Co-op, Party, Casual 등) | P2 |
-| 참여하기 | 모집 게시글에 참여 표시 | P2 |
+| 닉네임 검색 | profiles 테이블 ilike 검색 | P2 |
+| 검색 결과 유저 카드 | 아바타, 닉네임, 가입연도 표시 | P2 |
+| 공개 프로필 이동 | 유저 카드 클릭 → `/:userId` 페이지 | P2 |
 
 ---
 
@@ -304,7 +304,7 @@ VITE_RAWG_KEY=rawg에서_발급받은_API_키
 |------|------|-----------|
 | 팀원 A | DB / 백엔드 | supabase.js, AuthContext.jsx, useLibrary.js, useSearch.js, rawg.js |
 | 팀원 B | 페이지 | LandingPage, Dashboard, LibraryPage, GameDetailPage |
-| 팀원 C | 컴포넌트 / UI | components/ 전체, ProfilePage, LFGPage, StatsPage, global.css |
+| 팀원 C | 컴포넌트 / UI | components/ 전체, ProfilePage, LFGPage(유저검색), StatsPage, global.css |
 
 ---
 
@@ -318,6 +318,7 @@ main      최종 완성본
         ├── feat/library
         ├── feat/game-detail
         ├── feat/comments
+        ├── feat/user-search
         └── feat/supabase-db
 ```
 
@@ -330,8 +331,8 @@ main      최종 완성본
 
 ## 11. 미구현 / 추후 확장 계획
 
-- LFG 실시간 알림 (Supabase Realtime)
-- 공개 프로필 링크 (`/[userId]` 라우팅)
+- 공개 프로필 링크 (`/[userId]` 라우팅) 구현
+- 유저 팔로우 / 친구 기능
 - Steam API 연동 (실제 플레이 시간 자동 동기화)
 - 관리자 페이지 (유저 관리, 신고 처리)
 - 모바일 앱 (React Native)
