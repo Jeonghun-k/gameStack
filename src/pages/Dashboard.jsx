@@ -36,18 +36,22 @@ export default function Dashboard() {
             authUser.email?.split('@')[0] ??
             'Gamer';
 
-          setUserProfile({
-            displayName,
-            level: 1,
-            xp: 350,
-            xpNext: 1000,
-            platforms: ["PC", "PS5"]
-          });
-
-          // 2. Supabase 'games' 테이블에서 실제 내 라이브러리 가져오기
-          
           if (!error && gamesData) {
             setLibrary(gamesData);
+
+            const xpPerStatus = { backlog: 10, playing: 30, completed: 60, dropped: 10 };
+            const totalXp = gamesData.reduce((sum, g) => sum + (xpPerStatus[g.status] ?? 10), 0);
+            const level = Math.floor(totalXp / 100) + 1;
+            const xpInLevel = totalXp % 100;
+
+            setUserProfile({
+              displayName,
+              level,
+              xp: xpInLevel,
+              xpNext: 100,
+            });
+          } else {
+            setUserProfile({ displayName, level: 1, xp: 0, xpNext: 100 });
           }
         }
       } catch (err) {
