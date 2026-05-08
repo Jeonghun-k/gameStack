@@ -157,7 +157,7 @@
 
 ## 6. 게임 상세 페이지 (PRD §5-3) — 담당: 팀원 B
 
-> 브랜치: `feat/game-detail`
+> 브랜치: `feat/comments` → ✅ dev 머지 완료
 
 ### UI (완료)
 - [x] ✅ **[P0]** 게임 정보 표시 (제목, 커버, 장르, 메타스코어, 플레이 시간, 플랫폼)
@@ -165,16 +165,15 @@
 - [x] ✅ **[P1]** 상태 변경 버튼 UI
 - [x] ✅ **[P1]** 리뷰 작성 textarea UI
 
-### Supabase / RAWG 연동 (미완료)
-- [ ] ⬜ **[P0]** RAWG API로 게임 상세 정보 fetch (description_raw, released 등)
-- [ ] ⬜ **[P0]** 별점 저장 — `supabase.from('ratings').upsert({user_id, game_id, score})`
-- [ ] ⬜ **[P1]** 상태 변경 저장 — Supabase UPDATE
-- [ ] ⬜ **[P1]** 리뷰 저장 기능 연결
-- [ ] ⬜ **[P1]** 댓글 조회 — `supabase.from('comments').select('*').eq('game_id', id)`
-- [ ] ⬜ **[P1]** 댓글 작성 — `supabase.from('comments').insert({...})`
-- [ ] ⬜ **[P1]** 댓글 삭제 — `supabase.from('comments').delete().eq('id', commentId)`
-
-> 브랜치: `feat/comments`
+### Supabase / RAWG 연동 (완료)
+- [x] ✅ **[P0]** RAWG API로 게임 상세 정보 fetch (useGameDetail 훅)
+- [x] ✅ **[P0]** 별점 저장 — `supabase.from('ratings').upsert({user_id, game_id, score})`
+- [x] ✅ **[P1]** 상태 변경 저장 — Supabase UPDATE
+- [x] ✅ **[P1]** 댓글 작성 — `supabase.from('comments').insert({...})`
+- [x] ✅ **[P1]** 댓글 조회 — `supabase.from('comments').select('*').eq('game_id', id)`
+- [x] ✅ **[P1]** 댓글 삭제 — 본인 글만 삭제 (RLS + user_id 2중 검증)
+- [x] ✅ 라이브러리에서 게임 제거 기능
+- [x] ✅ 전체 유저 평균 별점 표시
 
 ---
 
@@ -256,9 +255,9 @@
 
 | 팀원 | 담당 | 상태 |
 |------|------|------|
-| 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | ✅ feat/auth → dev 머지 완료 / ⬜ Protected Route·profiles upsert 미완료 |
-| 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage 연동) | ✅ feat/search → dev 머지 완료 / ✅ feat/library → dev 머지 완료 |
-| 팀원 C | 컴포넌트/UI (components 전체, ProfilePage, LFGPage, StatsPage) | ✅ UI 완료 / ✅ feat/profile → dev 머지 완료 / ⬜ `/[userId]` 라우팅 미완료 |
+| 팀원 A | DB/Supabase (supabase.js, AuthContext, useLibrary, 인증) | ✅ feat/auth → dev 머지 완료 / ✅ Protected Route·profiles upsert 완료 |
+| 팀원 B | RAWG API (rawg.js, useSearch, useGameDetail, LibraryPage·GameDetailPage·Dashboard 연동) | ✅ feat/search → dev 머지 완료 / ✅ feat/library → dev 머지 완료 / ✅ feat/comments → dev 머지 완료 |
+| 팀원 C | 컴포넌트/UI (components 전체, ProfilePage, StatsPage, UserSearch) | ✅ UI 완료 / ✅ feat/profile → dev 머지 완료 / ✅ feat/user-search → dev 머지 완료 |
 
 ---
 

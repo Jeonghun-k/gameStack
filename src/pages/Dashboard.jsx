@@ -24,20 +24,27 @@ export default function Dashboard() {
         const { data: { user: authUser } } = await supabase.auth.getUser();
         
         if (authUser) {
-          // 유저 기본 정보 세팅 (추후 profiles 테이블과 연동 가능)
+          const [{ data: profileData }, { data: gamesData, error }] = await Promise.all([
+            supabase.from('profiles').select('nickname').eq('id', authUser.id).single(),
+            supabase.from('games').select('*').eq('user_id', authUser.id),
+          ]);
+
+          const displayName =
+            profileData?.nickname ??
+            authUser.user_metadata?.full_name ??
+            authUser.user_metadata?.name ??
+            authUser.email?.split('@')[0] ??
+            'Gamer';
+
           setUserProfile({
-            displayName: authUser.email.split('@')[0], // 이메일 앞부분을 닉네임으로 사용
-            level: 1, 
-            xp: 350, 
+            displayName,
+            level: 1,
+            xp: 350,
             xpNext: 1000,
             platforms: ["PC", "PS5"]
           });
 
           // 2. Supabase 'games' 테이블에서 실제 내 라이브러리 가져오기
-          const { data: gamesData, error } = await supabase
-            .from('games')
-            .select('*')
-            .eq('user_id', authUser.id);
           
           if (!error && gamesData) {
             setLibrary(gamesData);
