@@ -18,18 +18,42 @@ export default function GameDetailPage() {
   const [status, setStatus] = useState("backlog");
   const [review, setReview] = useState("");
   const [comments, setComments] = useState([]);
+  const [allRatings, setAllRatings] = useState([]);
+  const [userProfiles, setUserProfiles] = useState({});
 
   useEffect(() => {
-    const fetchComments = async () => {
-      const { data, error } = await supabase
+    const fetchData = async () => {
+      const { data: ratingsData } = await supabase
+        .from('ratings')
+        .select('user_id, score')
+        .eq('game_id', Number(id));
+      if (ratingsData) setAllRatings(ratingsData);
+
+      const { data: commentsData, error } = await supabase
         .from('comments')
         .select('*')
         .eq('game_id', Number(id))
         .order('created_at', { ascending: false });
       
-      if (!error && data) setComments(data);
+      if (!error && commentsData) {
+        setComments(commentsData);
+        
+        const userIds = [...new Set(commentsData.map(c => c.user_id))];
+        if (userIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, nickname')
+            .in('id', userIds);
+            
+          if (profilesData) {
+            const profilesMap = {};
+            profilesData.forEach(p => { profilesMap[p.id] = p.nickname; });
+            setUserProfiles(profilesMap);
+          }
+        }
+      }
     };
-    fetchComments();
+    fetchData();
   }, [id]);
   
   useEffect(() => {
@@ -77,6 +101,12 @@ export default function GameDetailPage() {
         }, { onConflict: 'user_id, game_id' });
 
       if (error) throw error;
+
+      setAllRatings(prev => {
+        const exists = prev.find(r => r.user_id === user.id);
+        if (exists) return prev.map(r => r.user_id === user.id ? { ...r, score: newScore } : r);
+        return [...prev, { user_id: user.id, score: newScore }];
+      });
     } catch (err) {
       console.error("별점 저장 에러:", err.message);
     }
@@ -140,6 +170,10 @@ export default function GameDetailPage() {
     if (!error && data) {
       setComments([data, ...comments]); 
       setReview(""); 
+      if (!userProfiles[user.id]) {
+        const { data: profile } = await supabase.from('profiles').select('nickname').eq('id', user.id).single();
+        if (profile) setUserProfiles(prev => ({ ...prev, [user.id]: profile.nickname }));
+      }
     }
   };
 
@@ -163,14 +197,34 @@ export default function GameDetailPage() {
   if (isLoading) return <div style={{ padding: 40, color: "var(--text3)", textAlign: "center" }}>데이터를 불러오는 중...</div>;
   if (error || !game) return <div style={{ padding: 40, color: "var(--text3)", textAlign: "center" }}>게임을 찾을 수 없습니다.</div>;
 
+  const averageRating = allRatings?.length > 0 ? (allRatings.reduce((sum, r) => sum + r.score, 0) / allRatings.length).toFixed(1) : null;
+  const ratingMap = {};
+  allRatings.forEach(r => { ratingMap[r.user_id] = r.score; });
+
   return (
     <div>
-      <button
-        onClick={() => navigate('/library')}
-        style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text3)", fontSize: 13, marginBottom: 20 }}
-      >
-        <Icon name="chevronLeft" size={15} /> Back to Library
-      </button>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <button
+          onClick={() => navigate('/library')}
+          style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text3)", fontSize: 13 }}
+        >
+          <Icon name="chevronLeft" size={15} /> Back to Library
+        </button>
+        <button 
+          onClick={handleRemoveFromLibrary}
+          style={{ 
+            background: "transparent", color: "rgba(239, 68, 68, 0.8)", 
+            border: "1px solid rgba(239, 68, 68, 0.3)", padding: "6px 14px", 
+            borderRadius: "8px", fontSize: "12px", fontWeight: "600", cursor: "pointer",
+            transition: "all 0.2s"
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+        >
+          <Icon name="x" size={12} style={{ display: "inline-block", marginRight: 4, verticalAlign: "-1px" }} />
+          Remove
+        </button>
+      </div>
 
       <div style={{ position: "relative", borderRadius: 20, overflow: "hidden", marginBottom: 24, height: 260 }}>
         <img src={game.cover} alt={game.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -182,6 +236,11 @@ export default function GameDetailPage() {
             ))}
           </div>
           <h1 style={{ fontFamily: "var(--font2)", fontWeight: 800, fontSize: 32, letterSpacing: "-0.03em", marginBottom: 10 }}>{game.title}</h1>
+          {averageRating && (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16, color: "#f59e0b", fontSize: 16, fontWeight: 700 }}>
+              <Icon name="star" size={16} /> {averageRating} <span style={{ fontSize: 12, color: "var(--text3)", fontWeight: 500 }}>({allRatings.length}명 평가)</span>
+            </div>
+          )}
           <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
             <StatusBadge status={status} size="lg" />
             {game.metacritic > 0 && (
@@ -221,18 +280,7 @@ export default function GameDetailPage() {
         </GlassCard>
       </div>
 
-      <div style={{ marginBottom: 24, textAlign: "right" }}>
-        <button 
-          onClick={handleRemoveFromLibrary}
-          style={{ 
-            background: "transparent", color: "rgba(239, 68, 68, 0.7)", 
-            border: "1px solid rgba(239, 68, 68, 0.3)", padding: "8px 16px", 
-            borderRadius: "8px", fontSize: "12px", fontWeight: "600", cursor: "pointer"
-          }}
-        >
-          Remove from Library
-        </button>
-      </div>
+
 
       <GlassCard style={{ padding: "20px", marginBottom: 24 }}>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10, color: "var(--text2)" }}>Write a Review</div>
@@ -253,23 +301,36 @@ export default function GameDetailPage() {
       </GlassCard>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {comments.map((c) => (
-          <GlassCard key={c.id} style={{ padding: "16px" }}>
-            <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8, whiteSpace: "pre-wrap" }}>{c.text}</div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11, color: "var(--text3)" }}>
-              <span>{new Date(c.created_at).toLocaleDateString()}</span>
-              {/* [수정] 현재 로그인한 유저 ID와 댓글 작성자 ID가 동일할 때만 삭제 버튼 렌더링 */}
-              {currentUser && currentUser.id === c.user_id && (
-                <button 
-                  onClick={() => handleDeleteComment(c.id)} 
-                  style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontSize: "11px" }}
-                >
-                  삭제
-                </button>
-              )}
-            </div>
-          </GlassCard>
-        ))}
+        {comments.map((c) => {
+          const authorName = userProfiles[c.user_id] || "Gamer";
+          const authorRating = ratingMap[c.user_id];
+          return (
+            <GlassCard key={c.id} style={{ padding: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text2)" }}>{authorName}</span>
+                  {authorRating && (
+                    <span style={{ display: "flex", alignItems: "center", gap: 3, color: "#f59e0b", fontSize: 11, fontWeight: 600, background: "rgba(245, 158, 11, 0.1)", padding: "2px 6px", borderRadius: 6 }}>
+                      <Icon name="star" size={10} /> {authorRating}
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: 11, color: "var(--text3)" }}>{new Date(c.created_at).toLocaleDateString()}</span>
+              </div>
+              <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8, whiteSpace: "pre-wrap" }}>{c.text}</div>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                {currentUser && currentUser.id === c.user_id && (
+                  <button 
+                    onClick={() => handleDeleteComment(c.id)} 
+                    style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontSize: "11px", fontWeight: 600 }}
+                  >
+                    삭제
+                  </button>
+                )}
+              </div>
+            </GlassCard>
+          );
+        })}
       </div>
     </div>
   );
