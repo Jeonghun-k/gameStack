@@ -7,6 +7,7 @@ import ProfilePage from './pages/ProfilePage';
 import LFGPage from './pages/LFGPage';
 import StatsPage from './pages/StatsPage';
 import GameDetailPage from './pages/GameDetailPage';
+import PublicProfilePage from './pages/PublicProfilePage';
 import { useAuth } from './context/AuthContext';
 
 function ProtectedRoute({ children }) {
@@ -26,6 +27,7 @@ function Layout() {
           <Route path="/lfg"        element={<LFGPage />} />
           <Route path="/stats"      element={<StatsPage />} />
           <Route path="/game/:id"   element={<GameDetailPage />} />
+          <Route path="/:userId"    element={<PublicProfilePage />} />
         </Routes>
       </main>
     </div>

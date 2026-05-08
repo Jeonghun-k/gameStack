@@ -8,7 +8,7 @@ const nav = [
   { id: "dashboard", label: "Dashboard", icon: "home" },
   { id: "library",   label: "Library",   icon: "library" },
   { id: "profile",   label: "Profile",   icon: "profile" },
-  { id: "lfg",       label: "Team-up",   icon: "lfg" },
+  { id: "lfg",       label: "유저 검색",   icon: "lfg" },
   { id: "stats",     label: "Stats",     icon: "stats" },
 ];
 

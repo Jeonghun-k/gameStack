@@ -27,11 +27,10 @@ export const useLibrary = () => {
     }
 
     setLoading(true);
-    // Supabase games 테이블에서 현재 유저 게임만 최신순으로 조회
-    // RLS 정책으로 인해 본인 데이터만 자동으로 필터링됨
     const { data, error } = await supabase
       .from('games')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {
