@@ -239,7 +239,7 @@
   - `/lfg` — LFGPage
   - `/stats` — StatsPage
   - `/game/:id` — GameDetailPage
-- [ ] ⬜ Protected Route 컴포넌트 — 미로그인 시 `/`로 리다이렉트 (AuthContext 완성 후)
+- [x] ✅ Protected Route 컴포넌트 — 미로그인 시 `/`로 리다이렉트 (App.jsx에 구현 완료)
 
 ---
 
