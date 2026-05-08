@@ -32,6 +32,7 @@ export const useLibrary = () => {
     const { data, error } = await supabase
       .from('games')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {
