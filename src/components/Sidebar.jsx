@@ -8,7 +8,7 @@ const nav = [
   { id: "dashboard", label: "Dashboard", icon: "home" },
   { id: "library",   label: "Library",   icon: "library" },
   { id: "profile",   label: "Profile",   icon: "profile" },
-  { id: "lfg",       label: "유저 검색",   icon: "lfg" },
+  { id: "lfg",       label: "User Search", icon: "lfg" },
   { id: "stats",     label: "Stats",     icon: "stats" },
 ];
 
@@ -89,11 +89,6 @@ export default function Sidebar() {
             >
               <Icon name={item.icon} size={17} />
               {item.label}
-              {item.id === "lfg" && (
-                <span style={{ marginLeft: "auto", background: "#ef4444", color: "#fff", borderRadius: 99, fontSize: 10, padding: "1px 6px", fontWeight: 700 }}>
-                  3
-                </span>
-              )}
             </button>
           );
         })}
