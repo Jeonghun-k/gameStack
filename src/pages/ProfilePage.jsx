@@ -36,8 +36,10 @@ export default function ProfilePage() {
 
   // 공유하기 클립보드 복사
   const [copied, setCopied] = useState(false);
+  const profileUrl = `https://game-stack-chi.vercel.app/${userId}`;
+
   const handleShare = () => {
-    navigator.clipboard.writeText(`gamestack.com/${userId.slice(0, 8)}`);
+    navigator.clipboard.writeText(profileUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -54,7 +56,7 @@ export default function ProfilePage() {
     <div>
       <TopBar
         title="My Profile"
-        subtitle={`gamestack.com/${userId.slice(0, 8)}`}
+        subtitle={`game-stack-chi.vercel.app/${userId.slice(0, 8)}...`}
         actions={
           <button
             onClick={() => setEditing((v) => !v)}
@@ -128,7 +130,7 @@ export default function ProfilePage() {
       <GlassCard style={{ padding: "20px 24px", display: "flex", alignItems: "center", gap: 16 }}>
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, marginBottom: 4 }}>공개 프로필 링크</div>
-          <div style={{ fontSize: 13, color: "var(--accent2)", fontFamily: "monospace" }}>gamestack.com/{userId.slice(0, 8)}</div>
+          <div style={{ fontSize: 13, color: "var(--accent2)", fontFamily: "monospace" }}>game-stack-chi.vercel.app/{userId.slice(0, 8)}...</div>
         </div>
         <button
           onClick={handleShare}
