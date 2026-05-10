@@ -84,7 +84,8 @@ export const useLibrary = () => {
       .single();
 
     if (error) {
-      console.error('Error fetching library:', error);
+      console.error('Error adding game:', error);
+      alert(`게임 추가 실패: ${error.message}`);
       return false;
     }
 
