@@ -14,25 +14,25 @@ export const AuthProvider = ({ children }) => {
   // loading: 세션 확인 중 여부 (true일 때는 화면을 렌더링하지 않음)
   const [loading, setLoading] = useState(true);
 
+  const upsertProfile = async (u) => {
+    await supabase.from('profiles').upsert({
+      id: u.id,
+      email: u.email,
+      nickname: u.user_metadata?.full_name ?? u.user_metadata?.name ?? u.email?.split('@')[0],
+    }, { onConflict: 'id' });
+  };
+
   useEffect(() => {
-    // 앱 시작 시 현재 세션(로그인 상태)을 Supabase에서 가져옴
-    // 새로고침해도 로그인 유지되는 이유가 여기 있음
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) upsertProfile(session.user);
       setLoading(false);
     });
 
-    // 로그인/로그아웃 이벤트를 실시간으로 감지하여 user 상태를 자동 업데이트
-    // 예: 다른 탭에서 로그아웃하면 이 탭도 자동으로 반영됨
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
-      if (event === 'SIGNED_IN' && session?.user) {
-        const u = session.user;
-        await supabase.from('profiles').upsert({
-          id: u.id,
-          email: u.email,
-          nickname: u.user_metadata?.full_name ?? u.user_metadata?.name ?? u.email?.split('@')[0],
-        }, { onConflict: 'id' });
+      if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        upsertProfile(session.user);
       }
     });
 
