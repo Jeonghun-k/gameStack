@@ -98,4 +98,4 @@ create policy "comments_delete" on comments for delete using (auth.uid() = user_
 > `lfg_posts` 테이블은 코드에서 사용하지 않으므로 생성 불필요
 
 
-6daa72b0adbf4cccaa417a92f8a25b47
+daa72b0adbf4cccaa417a92f8a25b47
